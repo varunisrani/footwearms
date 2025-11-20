@@ -9,6 +9,10 @@ import { useAppStore } from '@/lib/stores/app-store';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 import { StorageService } from '@/lib/services/storage.service';
 import { PurchaseItem, SaleItem } from '@/lib/types/database.types';
+import { SalesTrendChart } from '@/components/charts/sales-trend-chart';
+import { RevenuePieChart } from '@/components/charts/revenue-pie-chart';
+import { InventoryBarChart } from '@/components/charts/inventory-bar-chart';
+import { TopCustomersChart } from '@/components/charts/top-customers-chart';
 
 const purchaseItemService = new StorageService<PurchaseItem>('purchaseItems');
 const saleItemService = new StorageService<SaleItem>('saleItems');
@@ -162,6 +166,13 @@ export default function ReportsPage() {
             </Card>
           </div>
 
+          {/* Inventory Chart */}
+          <Card>
+            <CardContent className="pt-6">
+              <InventoryBarChart products={products} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Stock Valuation Report</CardTitle>
@@ -225,6 +236,26 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Sales Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardContent className="pt-6">
+                <SalesTrendChart sales={sales} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <RevenuePieChart sales={sales} customers={customers} />
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardContent className="pt-6">
+              <TopCustomersChart sales={sales} customers={customers} />
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>

@@ -185,7 +185,17 @@ export default function CustomerDetailPage() {
 
       {/* Recent Sales */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Recent Sales</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Recent Sales</h2>
+          {customerSales.length > 0 && (
+            <Link
+              href={`/customers/${customerId}/orders`}
+              className="text-sm text-blue-600 hover:text-blue-900"
+            >
+              View All Orders ({customerSales.length}) →
+            </Link>
+          )}
+        </div>
         {customerSales.length === 0 ? (
           <p className="text-gray-500 text-center py-4">No sales yet</p>
         ) : (
