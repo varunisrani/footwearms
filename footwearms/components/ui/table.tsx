@@ -39,7 +39,7 @@ export function TableRow({ children, className, ...props }: HTMLAttributes<HTMLT
   );
 }
 
-export function TableHead({ children, className, ...props }: HTMLAttributes<HTMLTableCellElement>) {
+export function TableHead({ children, className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={cn(
@@ -53,7 +53,7 @@ export function TableHead({ children, className, ...props }: HTMLAttributes<HTML
   );
 }
 
-export function TableCell({ children, className, ...props }: HTMLAttributes<HTMLTableCellElement>) {
+export function TableCell({ children, className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td className={cn('px-6 py-4 whitespace-nowrap text-sm text-gray-900', className)} {...props}>
       {children}
