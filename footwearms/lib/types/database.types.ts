@@ -158,6 +158,38 @@ export interface Payment {
   createdAt: string;
 }
 
+export interface SalesReturn {
+  id: number;
+  returnNumber: string;
+  saleId: number;
+  customerId: number;
+  returnDate: string;
+  reason: string;
+  subtotal: number;
+  taxAmount: number;
+  totalAmount: number;
+  refundAmount: number;
+  refundMethod: 'cash' | 'card' | 'upi' | 'cheque' | 'bank_transfer' | 'credit_note';
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SalesReturnItem {
+  id: number;
+  returnId: number;
+  saleItemId: number;
+  productId: number;
+  variantId?: number;
+  quantityReturned: number;
+  unitPrice: number;
+  taxPercent: number;
+  taxAmount: number;
+  totalAmount: number;
+  createdAt: string;
+}
+
 export interface StockAdjustment {
   id: number;
   adjustmentNumber: string;
@@ -205,6 +237,8 @@ export interface Database {
   purchaseItems: PurchaseItem[];
   sales: Sale[];
   saleItems: SaleItem[];
+  salesReturns: SalesReturn[];
+  salesReturnItems: SalesReturnItem[];
   invoices: Invoice[];
   payments: Payment[];
   stockAdjustments: StockAdjustment[];
@@ -219,6 +253,8 @@ export interface Database {
     purchaseItems: number;
     sales: number;
     saleItems: number;
+    salesReturns: number;
+    salesReturnItems: number;
     invoices: number;
     payments: number;
     stockAdjustments: number;

@@ -133,8 +133,13 @@ export default function ManufacturersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Link href={`/manufacturers/${manufacturer.id}/purchases`}>
+                          <Button variant="ghost" size="sm" title="View Purchase History">
+                            <span className="text-xs">📦</span>
+                          </Button>
+                        </Link>
                         <Link href={`/manufacturers/${manufacturer.id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Edit">
                             <Edit2 className="w-4 h-4" />
                           </Button>
                         </Link>
@@ -142,6 +147,7 @@ export default function ManufacturersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(manufacturer.id, manufacturer.name)}
+                          title="Delete"
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>

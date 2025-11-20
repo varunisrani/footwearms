@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSales } from '@/lib/hooks/use-sales';
+import { useSalesReturns } from '@/lib/hooks/use-sales-returns';
 import { useCustomers } from '@/lib/hooks/use-customers';
 import { useAppStore } from '@/lib/stores/app-store';
 import { SalesForm } from '@/components/forms/sales-form';
@@ -23,9 +24,11 @@ export default function SaleDetailPage() {
   const { getSale, getSaleItems, updateSale, updateSaleItem, deleteSaleItem, addSaleItem, loadSales } = useSales();
   const { customers, loadCustomers, getCustomer } = useCustomers();
   const { products, loadProducts, getProduct, updateProduct } = useAppStore();
+  const { getSalesReturnsBySale, getSalesReturnItems } = useSalesReturns();
 
   const [sale, setSale] = useState(getSale(saleId));
   const [saleItems, setSaleItems] = useState(getSaleItems(saleId));
+  const salesReturns = getSalesReturnsBySale(saleId);
 
   useEffect(() => {
     loadSales();
@@ -133,6 +136,12 @@ export default function SaleDetailPage() {
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
             >
               Generate Invoice
+            </Link>
+            <Link
+              href={`/sales/${saleId}/returns/new`}
+              className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+            >
+              Create Return
             </Link>
             <Link
               href={`/sales/${saleId}?edit=true`}
@@ -304,6 +313,76 @@ export default function SaleDetailPage() {
           </table>
         </div>
       </div>
+
+      {/* Sales Returns */}
+      {salesReturns.length > 0 && (
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg font-semibold mb-4">Sales Returns</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Return Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Reason
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    Items
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {salesReturns.map((returnRecord) => {
+                  const returnItems = getSalesReturnItems(returnRecord.id);
+                  return (
+                    <tr key={returnRecord.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {returnRecord.returnNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {formatDate(returnRecord.returnDate)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">{returnRecord.reason}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {formatCurrency(returnRecord.totalAmount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${
+                            returnRecord.status === 'completed'
+                              ? 'bg-green-100 text-green-800'
+                              : returnRecord.status === 'approved'
+                              ? 'bg-blue-100 text-blue-800'
+                              : returnRecord.status === 'rejected'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {returnRecord.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {returnItems.length} item(s)
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Notes */}
       {sale.notes && (
