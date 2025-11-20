@@ -51,6 +51,9 @@ const defaultDatabase: Database = {
 // Initialize database if it doesn't exist
 export function initializeDatabase(): Database {
   try {
+    if (typeof window === 'undefined') {
+      return defaultDatabase;
+    }
     const existingData = localStorage.getItem(STORAGE_KEY);
     if (!existingData) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultDatabase));
@@ -66,6 +69,9 @@ export function initializeDatabase(): Database {
 // Get the entire database
 export function getDatabase(): Database {
   try {
+    if (typeof window === 'undefined') {
+      return defaultDatabase;
+    }
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) {
       return initializeDatabase();
@@ -80,6 +86,9 @@ export function getDatabase(): Database {
 // Save the entire database
 export function saveDatabase(db: Database): void {
   try {
+    if (typeof window === 'undefined') {
+      return;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch (error) {
     console.error('Error saving database:', error);
