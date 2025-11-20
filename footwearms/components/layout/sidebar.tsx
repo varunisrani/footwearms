@@ -13,6 +13,8 @@ import {
   TrendingUp,
   Settings,
   Boxes,
+  BarChart3,
+  Receipt,
 } from 'lucide-react';
 
 const navigation = [
@@ -23,7 +25,8 @@ const navigation = [
   { name: 'Purchases', href: '/purchases', icon: ShoppingCart },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Sales', href: '/sales', icon: TrendingUp },
-  { name: 'Billing', href: '/billing', icon: FileText },
+  { name: 'Invoices', href: '/billing/invoices', icon: Receipt },
+  { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -64,7 +67,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="px-4 py-4 border-t border-gray-800">
         <p className="text-xs text-gray-400 text-center">
-          v1.0.0 - Phase 1
+          v2.0.0 - Phase 3 & 4
         </p>
       </div>
     </div>
