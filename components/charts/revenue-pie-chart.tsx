@@ -3,6 +3,7 @@
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Sale, Customer } from '@/lib/types/database.types';
+import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -12,6 +13,8 @@ interface RevenuePieChartProps {
 }
 
 export function RevenuePieChart({ sales, customers }: RevenuePieChartProps) {
+  const { isMobile } = useBreakpoint();
+
   // Group revenue by customer
   const revenueByCustomer: Record<number, number> = {};
 
@@ -64,17 +67,27 @@ export function RevenuePieChart({ sales, customers }: RevenuePieChartProps) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right' as const,
+        position: isMobile ? ('bottom' as const) : ('right' as const),
+        labels: {
+          boxWidth: isMobile ? 12 : 15,
+          padding: isMobile ? 8 : 10,
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
       },
       title: {
         display: true,
         text: 'Revenue Distribution - Top 5 Customers',
         font: {
-          size: 16,
+          size: isMobile ? 14 : 16,
           weight: 'bold' as const,
         },
       },
       tooltip: {
+        bodyFont: {
+          size: isMobile ? 11 : 13,
+        },
         callbacks: {
           label: function (context: any) {
             const label = context.label || '';
@@ -89,7 +102,7 @@ export function RevenuePieChart({ sales, customers }: RevenuePieChartProps) {
   };
 
   return (
-    <div className="h-[400px]">
+    <div className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
       <Pie data={data} options={options} />
     </div>
   );

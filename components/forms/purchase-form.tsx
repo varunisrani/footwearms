@@ -280,8 +280,8 @@ export function PurchaseForm({ purchase, isEdit = false }: PurchaseFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Add Line Item Form */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 p-4 bg-gray-50 rounded-lg">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="sm:col-span-2">
               <Select
                 label="Product"
                 value={selectedProductId}
@@ -308,7 +308,7 @@ export function PurchaseForm({ purchase, isEdit = false }: PurchaseFormProps) {
                 min="0"
               />
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end sm:col-span-2 md:col-span-1">
               <Button type="button" onClick={addLineItem} className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
                 Add
@@ -316,50 +316,100 @@ export function PurchaseForm({ purchase, isEdit = false }: PurchaseFormProps) {
             </div>
           </div>
 
-          {/* Line Items Table */}
+          {/* Line Items - Desktop Table View */}
           {lineItems.length > 0 ? (
-            <div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Unit Cost</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {lineItems.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{item.productName}</TableCell>
-                      <TableCell>{item.quantity}</TableCell>
-                      <TableCell>{formatCurrency(item.unitCost)}</TableCell>
-                      <TableCell>{formatCurrency(item.totalAmount)}</TableCell>
-                      <TableCell>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeLineItem(index)}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </TableCell>
+            <>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Unit Cost</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                  <TableRow>
-                    <TableCell colSpan={3} className="text-right font-bold">
-                      Total:
-                    </TableCell>
-                    <TableCell className="font-bold text-lg">
+                  </TableHeader>
+                  <TableBody>
+                    {lineItems.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{item.productName}</TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>{formatCurrency(item.unitCost)}</TableCell>
+                        <TableCell>{formatCurrency(item.totalAmount)}</TableCell>
+                        <TableCell>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeLineItem(index)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-right font-bold">
+                        Total:
+                      </TableCell>
+                      <TableCell className="font-bold text-lg">
+                        {formatCurrency(calculateTotal())}
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile: Card View */}
+              <div className="md:hidden space-y-3">
+                {lineItems.map((item, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-3 bg-white">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm text-gray-900">
+                          {item.productName}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeLineItem(index)}
+                        className="text-red-600 p-1 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="text-gray-500 text-xs">Quantity:</span>
+                        <p className="font-medium">{item.quantity}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-500 text-xs">Unit Cost:</span>
+                        <p className="font-medium">{formatCurrency(item.unitCost)}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Total:</span>
+                      <span className="font-bold text-base">{formatCurrency(item.totalAmount)}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Mobile Total */}
+                <div className="border-t-2 border-gray-300 pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-base">Total:</span>
+                    <span className="font-bold text-xl text-blue-600">
                       {formatCurrency(calculateTotal())}
-                    </TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
           ) : (
             <p className="text-center text-gray-500 py-8">
               No line items added yet. Add products above.
@@ -368,15 +418,16 @@ export function PurchaseForm({ purchase, isEdit = false }: PurchaseFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-col md:flex-row gap-3 justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push('/purchases')}
+          className="w-full md:w-auto"
         >
           Cancel
         </Button>
-        <Button type="submit">
+        <Button type="submit" className="w-full md:w-auto">
           {isEdit ? 'Update Purchase Order' : 'Create Purchase Order'}
         </Button>
       </div>

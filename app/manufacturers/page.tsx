@@ -34,15 +34,15 @@ export default function ManufacturersPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Manufacturers</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Manufacturers</h1>
           <p className="text-gray-600 mt-1">Manage your manufacturer relationships</p>
         </div>
         <Link href="/manufacturers/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add Manufacturer
           </Button>
@@ -50,7 +50,7 @@ export default function ManufacturersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-black">Total Manufacturers</div>

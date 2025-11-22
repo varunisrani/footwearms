@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Sale, Customer } from '@/lib/types/database.types';
+import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -20,6 +21,8 @@ interface TopCustomersChartProps {
 }
 
 export function TopCustomersChart({ sales, customers }: TopCustomersChartProps) {
+  const { isMobile } = useBreakpoint();
+
   // Group sales by customer
   const salesByCustomer: Record<number, { revenue: number; orders: number }> = {};
 
@@ -71,18 +74,38 @@ export function TopCustomersChart({ sales, customers }: TopCustomersChartProps) 
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: isMobile ? ('bottom' as const) : ('top' as const),
+        labels: {
+          boxWidth: isMobile ? 12 : 15,
+          padding: isMobile ? 8 : 10,
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
       },
       title: {
         display: true,
         text: 'Top 8 Customers by Revenue',
         font: {
-          size: 16,
+          size: isMobile ? 14 : 16,
           weight: 'bold' as const,
+        },
+      },
+      tooltip: {
+        bodyFont: {
+          size: isMobile ? 11 : 13,
         },
       },
     },
     scales: {
+      x: {
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
+          maxRotation: isMobile ? 45 : 0,
+        },
+      },
       y: {
         type: 'linear' as const,
         display: true,
@@ -90,6 +113,14 @@ export function TopCustomersChart({ sales, customers }: TopCustomersChartProps) 
         title: {
           display: true,
           text: 'Revenue',
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
         },
         beginAtZero: true,
       },
@@ -100,6 +131,14 @@ export function TopCustomersChart({ sales, customers }: TopCustomersChartProps) 
         title: {
           display: true,
           text: 'Orders',
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
         },
         beginAtZero: true,
         grid: {
@@ -110,7 +149,7 @@ export function TopCustomersChart({ sales, customers }: TopCustomersChartProps) 
   };
 
   return (
-    <div className="h-[400px]">
+    <div className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
       <Bar data={data} options={options} />
     </div>
   );

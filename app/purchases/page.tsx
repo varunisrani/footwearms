@@ -54,15 +54,15 @@ export default function PurchasesPage() {
   const totalOutstanding = purchases.reduce((sum, p) => sum + p.balanceAmount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Purchase Orders</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Purchase Orders</h1>
           <p className="text-gray-600 mt-1">Manage your purchase orders and inventory receipts</p>
         </div>
         <Link href="/purchases/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             New Purchase Order
           </Button>
@@ -70,7 +70,7 @@ export default function PurchasesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-gray-600">Total Orders</div>

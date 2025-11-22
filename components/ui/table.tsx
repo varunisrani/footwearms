@@ -43,7 +43,7 @@ export function TableHead({ children, className, ...props }: React.ThHTMLAttribu
   return (
     <th
       className={cn(
-        'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+        'px-3 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ export function TableHead({ children, className, ...props }: React.ThHTMLAttribu
 
 export function TableCell({ children, className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={cn('px-6 py-4 whitespace-nowrap text-sm text-gray-900', className)} {...props}>
+    <td className={cn('px-3 py-2 md:px-6 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900', className)} {...props}>
       {children}
     </td>
   );

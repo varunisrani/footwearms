@@ -64,15 +64,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+    <div className="p-3 md:p-6 max-w-5xl mx-auto">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Settings</h1>
         <p className="mt-1 text-sm text-gray-600">
           Configure your application settings and manage data
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Business Information */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Business Information</h2>
@@ -140,10 +140,10 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col sm:flex-row justify-end gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Save Business Information
               </button>
@@ -226,10 +226,10 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex flex-col sm:flex-row justify-end gap-3">
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Save Application Settings
               </button>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
               </p>
               <button
                 onClick={handleBackup}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Download Backup
               </button>
@@ -319,7 +319,7 @@ export default function SettingsPage() {
               </p>
               <button
                 onClick={handleClearData}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
               >
                 Clear All Data
               </button>

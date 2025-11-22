@@ -1,12 +1,16 @@
+'use client';
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { Toaster } from "react-hot-toast";
+import { useState } from "react";
 
-export const metadata: Metadata = {
-  title: "Footwear Management System",
-  description: "Complete footwear wholesale management solution",
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -14,20 +18,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <html lang="en">
       <body className="font-sans antialiased">
         <div className="flex h-screen overflow-hidden">
           {/* Sidebar */}
-          <Sidebar />
+          <Sidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
 
           {/* Main Content */}
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Header */}
-            <Header />
+            <Header onMenuClick={() => setSidebarOpen(true)} />
 
             {/* Page Content */}
-            <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+            <main className="flex-1 overflow-y-auto bg-gray-50 p-3 md:p-6">
               {children}
             </main>
           </div>

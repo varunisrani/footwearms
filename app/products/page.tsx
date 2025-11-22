@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { ResponsiveTable } from '@/components/ui/responsive-table';
 import { useAppStore } from '@/lib/stores/app-store';
 import { formatCurrency } from '@/lib/utils/format';
 import toast from 'react-hot-toast';
@@ -41,15 +42,15 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-600 mt-1">Manage your product catalog</p>
         </div>
         <Link href="/products/new">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
@@ -57,7 +58,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-black">Total Products</div>
@@ -115,59 +116,129 @@ export default function ProductsPage() {
               </Link>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Brand</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Manufacturer</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-mono text-xs">{product.sku}</TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.brand}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{getManufacturerName(product.manufacturerId)}</TableCell>
-                    <TableCell>
-                      <span className={product.currentStock <= product.minStockLevel ? 'text-red-600 font-semibold' : ''}>
-                        {product.currentStock}
-                      </span>
-                    </TableCell>
-                    <TableCell>{formatCurrency(product.sellingPrice)}</TableCell>
-                    <TableCell>
-                      <Badge variant={product.isActive ? 'success' : 'default'}>
-                        {product.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Link href={`/products/${product.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(product.id, product.name)}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
+            <ResponsiveTable
+              data={filteredProducts}
+              tableView={
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Brand</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Manufacturer</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.map((product) => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-mono text-xs">{product.sku}</TableCell>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.brand}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>{getManufacturerName(product.manufacturerId)}</TableCell>
+                        <TableCell>
+                          <span className={product.currentStock <= product.minStockLevel ? 'text-red-600 font-semibold' : ''}>
+                            {product.currentStock}
+                          </span>
+                        </TableCell>
+                        <TableCell>{formatCurrency(product.sellingPrice)}</TableCell>
+                        <TableCell>
+                          <Badge variant={product.isActive ? 'success' : 'default'}>
+                            {product.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Link href={`/products/${product.id}`}>
+                              <Button variant="ghost" size="sm">
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(product.id, product.name)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              }
+              mobileCardRender={(product) => (
+                <Card className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-base">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        SKU: {product.sku}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          {product.category}
+                        </span>
+                        {product.brand && (
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {product.brand}
+                          </span>
+                        )}
+                        {product.size && (
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            Size: {product.size}
+                          </span>
+                        )}
+                        {product.color && (
+                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {product.color}
+                          </span>
+                        )}
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg text-gray-900">
+                        {formatCurrency(product.sellingPrice)}
+                      </p>
+                      <p className={`text-xs mt-0.5 ${product.currentStock <= product.minStockLevel ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                        Stock: {product.currentStock}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <Badge variant={product.isActive ? 'success' : 'default'}>
+                      {product.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.location.href = `/products/${product.id}`}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(product.id, product.name)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            />
           )}
         </CardContent>
       </Card>

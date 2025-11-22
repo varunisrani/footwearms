@@ -4,6 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Sale, Customer } from '@/lib/types/database.types';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
+import { ResponsiveTable } from '@/components/ui/responsive-table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 
 interface SalesTableProps {
   sales: Sale[];
@@ -40,7 +44,7 @@ export function SalesTable({ sales, customers, onDelete }: SalesTableProps) {
     <div className="space-y-4">
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Search
@@ -77,115 +81,178 @@ export function SalesTable({ sales, customers, onDelete }: SalesTableProps) {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sale Number
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Balance
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSales.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                    No sales found
-                  </td>
-                </tr>
-              ) : (
-                filteredSales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{sale.saleNumber}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{getCustomerName(sale.customerId)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{formatDate(sale.saleDate)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {formatCurrency(sale.totalAmount)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`text-sm font-medium ${sale.balanceAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                        {formatCurrency(sale.balanceAmount)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${
-                          sale.status === 'delivered'
-                            ? 'bg-green-100 text-green-800'
-                            : sale.status === 'cancelled'
-                            ? 'bg-red-100 text-red-800'
-                            : sale.status === 'draft'
-                            ? 'bg-gray-100 text-gray-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
-                      >
-                        {sale.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/sales/${sale.id}`}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          View
-                        </Link>
-                        <Link
-                          href={`/sales/${sale.id}?edit=true`}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </Link>
-                        {onDelete && (
-                          <button
-                            onClick={() => handleDelete(sale.id, sale.saleNumber)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Summary */}
-        {filteredSales.length > 0 && (
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-            <div className="text-sm text-gray-700">
-              Showing {filteredSales.length} of {sales.length} sales
-            </div>
+        {filteredSales.length === 0 ? (
+          <div className="px-6 py-8 text-center text-gray-500">
+            No sales found
           </div>
+        ) : (
+          <>
+            <ResponsiveTable
+              data={filteredSales}
+              tableView={
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Sale Number
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Customer
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Total Amount
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Balance
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredSales.map((sale) => (
+                        <tr key={sale.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{sale.saleNumber}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{getCustomerName(sale.customerId)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{formatDate(sale.saleDate)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {formatCurrency(sale.totalAmount)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className={`text-sm font-medium ${sale.balanceAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              {formatCurrency(sale.balanceAmount)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize ${
+                                sale.status === 'delivered'
+                                  ? 'bg-green-100 text-green-800'
+                                  : sale.status === 'cancelled'
+                                  ? 'bg-red-100 text-red-800'
+                                  : sale.status === 'draft'
+                                  ? 'bg-gray-100 text-gray-800'
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
+                              {sale.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex gap-2">
+                              <Link
+                                href={`/sales/${sale.id}`}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                View
+                              </Link>
+                              <Link
+                                href={`/sales/${sale.id}?edit=true`}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                Edit
+                              </Link>
+                              {onDelete && (
+                                <button
+                                  onClick={() => handleDelete(sale.id, sale.saleNumber)}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              }
+              mobileCardRender={(sale) => (
+                <Card className="p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-base">
+                        {sale.saleNumber}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {getCustomerName(sale.customerId)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {formatDate(sale.saleDate)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg text-gray-900">
+                        {formatCurrency(sale.totalAmount)}
+                      </p>
+                      {sale.balanceAmount > 0 && (
+                        <p className="text-sm text-orange-600 mt-1">
+                          Bal: {formatCurrency(sale.balanceAmount)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Badge
+                      variant={
+                        sale.status === 'delivered'
+                          ? 'success'
+                          : sale.status === 'cancelled'
+                          ? 'danger'
+                          : sale.status === 'draft'
+                          ? 'default'
+                          : 'info'
+                      }
+                    >
+                      {sale.status}
+                    </Badge>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.location.href = `/sales/${sale.id}`}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => window.location.href = `/sales/${sale.id}?edit=true`}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            />
+
+            {/* Summary */}
+            <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+              <div className="text-sm text-gray-700">
+                Showing {filteredSales.length} of {sales.length} sales
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
