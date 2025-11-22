@@ -13,6 +13,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Sale } from '@/lib/types/database.types';
+import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 
 ChartJS.register(
   CategoryScale,
@@ -30,6 +31,8 @@ interface SalesTrendChartProps {
 }
 
 export function SalesTrendChart({ sales }: SalesTrendChartProps) {
+  const { isMobile } = useBreakpoint();
+
   // Group sales by month
   const salesByMonth: Record<string, { totalAmount: number; count: number }> = {};
 
@@ -89,18 +92,38 @@ export function SalesTrendChart({ sales }: SalesTrendChartProps) {
     },
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: isMobile ? ('bottom' as const) : ('top' as const),
+        labels: {
+          boxWidth: isMobile ? 12 : 15,
+          padding: isMobile ? 8 : 10,
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
       },
       title: {
         display: true,
         text: 'Sales Trend Over Time',
         font: {
-          size: 16,
+          size: isMobile ? 14 : 16,
           weight: 'bold' as const,
+        },
+      },
+      tooltip: {
+        bodyFont: {
+          size: isMobile ? 11 : 13,
         },
       },
     },
     scales: {
+      x: {
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
+          maxRotation: isMobile ? 45 : 0,
+        },
+      },
       y: {
         type: 'linear' as const,
         display: true,
@@ -108,6 +131,14 @@ export function SalesTrendChart({ sales }: SalesTrendChartProps) {
         title: {
           display: true,
           text: 'Revenue',
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
         },
       },
       y1: {
@@ -117,6 +148,14 @@ export function SalesTrendChart({ sales }: SalesTrendChartProps) {
         title: {
           display: true,
           text: 'Order Count',
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
         },
         grid: {
           drawOnChartArea: false,
@@ -126,7 +165,7 @@ export function SalesTrendChart({ sales }: SalesTrendChartProps) {
   };
 
   return (
-    <div className="h-[400px]">
+    <div className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
       <Line data={data} options={options} />
     </div>
   );

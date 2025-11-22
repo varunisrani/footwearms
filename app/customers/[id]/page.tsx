@@ -70,30 +70,30 @@ export default function CustomerDetailPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-3 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-start">
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{customer.name}</h1>
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">{customer.name}</h1>
             <p className="mt-1 text-sm text-gray-600">{customer.businessName}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
             <Link
               href={`/sales/new?customerId=${customerId}`}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-center"
             >
               New Sale
             </Link>
             <Link
               href={`/customers/${customerId}?edit=true`}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center"
             >
               Edit
             </Link>
             <Link
               href="/customers"
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-center"
             >
               Back
             </Link>
@@ -102,7 +102,7 @@ export default function CustomerDetailPage() {
       </div>
 
       {/* Customer Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
         {/* Contact Information */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Contact Information</h2>

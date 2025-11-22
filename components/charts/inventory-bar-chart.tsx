@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Product } from '@/lib/types/database.types';
+import { useBreakpoint } from '@/lib/hooks/use-breakpoint';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -19,6 +20,8 @@ interface InventoryBarChartProps {
 }
 
 export function InventoryBarChart({ products }: InventoryBarChartProps) {
+  const { isMobile } = useBreakpoint();
+
   // Sort by current stock and take top 10 products
   const sortedProducts = [...products]
     .sort((a, b) => b.currentStock - a.currentStock)
@@ -53,30 +56,58 @@ export function InventoryBarChart({ products }: InventoryBarChartProps) {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: isMobile ? ('bottom' as const) : ('top' as const),
+        labels: {
+          boxWidth: isMobile ? 12 : 15,
+          padding: isMobile ? 8 : 10,
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
       },
       title: {
         display: true,
         text: 'Top 10 Products by Stock Level',
         font: {
-          size: 16,
+          size: isMobile ? 14 : 16,
           weight: 'bold' as const,
+        },
+      },
+      tooltip: {
+        bodyFont: {
+          size: isMobile ? 11 : 13,
         },
       },
     },
     scales: {
+      x: {
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
+          maxRotation: isMobile ? 45 : 0,
+        },
+      },
       y: {
         beginAtZero: true,
         title: {
           display: true,
           text: 'Quantity',
+          font: {
+            size: isMobile ? 10 : 12,
+          },
+        },
+        ticks: {
+          font: {
+            size: isMobile ? 9 : 11,
+          },
         },
       },
     },
   };
 
   return (
-    <div className="h-[400px]">
+    <div className="h-[250px] sm:h-[300px] md:h-[350px] lg:h-[400px]">
       <Bar data={data} options={options} />
     </div>
   );

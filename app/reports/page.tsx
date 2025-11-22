@@ -86,24 +86,24 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
-          <p className="text-gray-600 mt-1">View comprehensive business reports and export data</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-1">View comprehensive business reports and export data</p>
         </div>
-        <Button onClick={exportToCSV}>
+        <Button onClick={exportToCSV} className="w-full sm:w-auto">
           <Download className="w-4 h-4 mr-2" />
           Export to CSV
         </Button>
       </div>
 
       {/* Report Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex flex-col sm:flex-row gap-2 border-b border-gray-200">
         <button
           onClick={() => setActiveReport('inventory')}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors w-full sm:w-auto ${
             activeReport === 'inventory'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -114,7 +114,7 @@ export default function ReportsPage() {
         </button>
         <button
           onClick={() => setActiveReport('sales')}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors w-full sm:w-auto ${
             activeReport === 'sales'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -125,7 +125,7 @@ export default function ReportsPage() {
         </button>
         <button
           onClick={() => setActiveReport('purchases')}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors w-full sm:w-auto ${
             activeReport === 'purchases'
               ? 'border-blue-600 text-blue-600'
               : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -139,7 +139,7 @@ export default function ReportsPage() {
       {/* Inventory Report */}
       {activeReport === 'inventory' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-sm text-gray-600">Total Stock Value</div>
@@ -175,7 +175,7 @@ export default function ReportsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Stock Valuation Report</CardTitle>
+              <CardTitle className="text-base md:text-lg">Stock Valuation Report</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -210,7 +210,7 @@ export default function ReportsPage() {
       {/* Sales Report */}
       {activeReport === 'sales' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-sm text-gray-600">Total Sales</div>
@@ -259,7 +259,7 @@ export default function ReportsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Sales Summary</CardTitle>
+              <CardTitle className="text-base md:text-lg">Sales Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -299,7 +299,7 @@ export default function ReportsPage() {
       {/* Purchase Report */}
       {activeReport === 'purchases' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="text-sm text-gray-600">Total Purchases</div>
@@ -328,7 +328,7 @@ export default function ReportsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Purchase Summary</CardTitle>
+              <CardTitle className="text-base md:text-lg">Purchase Summary</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>

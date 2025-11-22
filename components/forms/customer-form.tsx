@@ -55,7 +55,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -116,7 +116,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       </div>
 
       {/* Contact Information */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -161,7 +161,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       </div>
 
       {/* Address Information */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Address Information</h3>
         <div className="space-y-4">
           <div>
@@ -202,7 +202,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       </div>
 
       {/* Financial Information */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Financial Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -238,7 +238,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       </div>
 
       {/* Status */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -254,17 +254,17 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col md:flex-row justify-end gap-3">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           {customer ? 'Update Customer' : 'Add Customer'}
         </button>

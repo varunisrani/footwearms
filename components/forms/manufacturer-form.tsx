@@ -187,15 +187,16 @@ export function ManufacturerForm({ manufacturer, isEdit = false }: ManufacturerF
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-col md:flex-row gap-3 justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push('/manufacturers')}
+          className="w-full md:w-auto"
         >
           Cancel
         </Button>
-        <Button type="submit">
+        <Button type="submit" className="w-full md:w-auto">
           {isEdit ? 'Update Manufacturer' : 'Add Manufacturer'}
         </Button>
       </div>

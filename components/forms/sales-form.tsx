@@ -53,6 +53,17 @@ export function SalesForm({
       : []
   );
 
+  // Mobile modal state
+  const [showItemModal, setShowItemModal] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [currentItem, setCurrentItem] = useState<LineItem>({
+    productId: 0,
+    quantity: 1,
+    unitPrice: 0,
+    discountPercent: 0,
+    taxPercent: 18,
+  });
+
   const addLineItem = () => {
     setLineItems([
       ...lineItems,
@@ -77,6 +88,61 @@ export function SalesForm({
 
   const removeLineItem = (index: number) => {
     setLineItems(lineItems.filter((_, i) => i !== index));
+  };
+
+  const handleEditItem = (index: number) => {
+    setEditingIndex(index);
+    setCurrentItem({ ...lineItems[index] });
+    setShowItemModal(true);
+  };
+
+  const handleSaveItem = () => {
+    if (currentItem.productId === 0) {
+      alert('Please select a product');
+      return;
+    }
+
+    if (editingIndex !== null) {
+      // Update existing item
+      const updated = [...lineItems];
+      updated[editingIndex] = currentItem;
+      setLineItems(updated);
+    } else {
+      // Add new item
+      setLineItems([...lineItems, currentItem]);
+    }
+
+    // Reset modal state
+    setShowItemModal(false);
+    setEditingIndex(null);
+    setCurrentItem({
+      productId: 0,
+      quantity: 1,
+      unitPrice: 0,
+      discountPercent: 0,
+      taxPercent: 18,
+    });
+  };
+
+  const handleProductChange = (productId: number) => {
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setCurrentItem({
+        ...currentItem,
+        productId,
+        unitPrice: product.sellingPrice,
+      });
+    } else {
+      setCurrentItem({ ...currentItem, productId });
+    }
+  };
+
+  const calculateItemTotal = () => {
+    const subtotal = currentItem.quantity * currentItem.unitPrice;
+    const discountAmount = (subtotal * currentItem.discountPercent) / 100;
+    const afterDiscount = subtotal - discountAmount;
+    const taxAmount = (afterDiscount * currentItem.taxPercent) / 100;
+    return afterDiscount + taxAmount;
   };
 
   const calculateLineTotal = (item: LineItem) => {
@@ -185,7 +251,7 @@ export function SalesForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Header Information */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Sale Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -281,19 +347,37 @@ export function SalesForm({
       </div>
 
       {/* Line Items */}
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Items</h3>
           <button
             type="button"
+            onClick={() => {
+              setEditingIndex(null);
+              setCurrentItem({
+                productId: 0,
+                quantity: 1,
+                unitPrice: 0,
+                discountPercent: 0,
+                taxPercent: 18,
+              });
+              setShowItemModal(true);
+            }}
+            className="md:hidden px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+          >
+            + Add Item
+          </button>
+          <button
+            type="button"
             onClick={addLineItem}
-            className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            className="hidden md:block px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
           >
             + Add Item
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop: Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -412,58 +496,248 @@ export function SalesForm({
               })}
             </tbody>
           </table>
-
-          {lineItems.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No items added. Click "Add Item" to begin.
-            </div>
-          )}
         </div>
+
+        {/* Mobile: Card View */}
+        <div className="md:hidden space-y-3">
+          {lineItems.map((item, index) => {
+            const product = products.find((p) => p.id === item.productId);
+            const lineTotal = calculateLineTotal(item);
+            return (
+              <div key={index} className="border border-gray-200 rounded-lg p-3 bg-white">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-gray-900">
+                      {product?.name || 'Unknown Product'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {product?.sku || 'N/A'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeLineItem(index)}
+                    className="text-red-600 p-1 hover:bg-red-50 rounded"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-gray-500 text-xs">Quantity:</span>
+                    <p className="font-medium">{item.quantity}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-xs">Unit Price:</span>
+                    <p className="font-medium">{formatCurrency(item.unitPrice)}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-xs">Discount:</span>
+                    <p className="font-medium">{item.discountPercent}%</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500 text-xs">Tax:</span>
+                    <p className="font-medium">{item.taxPercent}%</p>
+                  </div>
+                </div>
+
+                <div className="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Total:</span>
+                  <span className="font-bold text-base">{formatCurrency(lineTotal.total)}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleEditItem(index)}
+                  className="w-full mt-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm"
+                >
+                  Edit Item
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {lineItems.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            No items added. Click "Add Item" to begin.
+          </div>
+        )}
       </div>
 
       {/* Totals */}
       {lineItems.length > 0 && (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4">Summary</h3>
-          <div className="max-w-md ml-auto space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-700">Subtotal:</span>
-              <span className="font-medium">{formatCurrency(totals.subtotal)}</span>
+          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <span className="text-gray-600">Subtotal:</span>
+              <span className="text-right font-medium">{formatCurrency(totals.subtotal)}</span>
+
+              <span className="text-gray-600">Discount:</span>
+              <span className="text-right font-medium text-red-600">-{formatCurrency(totals.discountAmount)}</span>
+
+              <span className="text-gray-600">Tax:</span>
+              <span className="text-right font-medium">{formatCurrency(totals.taxAmount)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Discount:</span>
-              <span className="font-medium text-red-600">
-                -{formatCurrency(totals.discountAmount)}
+
+            <div className="pt-2 border-t border-gray-200 grid grid-cols-2">
+              <span className="font-semibold text-base md:text-lg">Total:</span>
+              <span className="text-right font-bold text-lg md:text-xl text-blue-600">
+                {formatCurrency(totals.totalAmount)}
               </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Tax:</span>
-              <span className="font-medium">{formatCurrency(totals.taxAmount)}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold border-t pt-2">
-              <span>Total:</span>
-              <span>{formatCurrency(totals.totalAmount)}</span>
             </div>
           </div>
         </div>
       )}
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-col md:flex-row justify-end gap-3">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           {sale ? 'Update Sale' : 'Create Sale'}
         </button>
       </div>
+
+      {/* Mobile Item Modal */}
+      {showItemModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">
+                {editingIndex !== null ? 'Edit Item' : 'Add Item'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowItemModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Product *
+                </label>
+                <select
+                  value={currentItem.productId}
+                  onChange={(e) => handleProductChange(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  required
+                >
+                  <option value="0">Select Product</option>
+                  {products.filter((p) => p.isActive).map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name} (Stock: {product.currentStock})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quantity *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={currentItem.quantity}
+                  onChange={(e) => setCurrentItem({ ...currentItem, quantity: parseInt(e.target.value) || 1 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Unit Price *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={currentItem.unitPrice}
+                  onChange={(e) => setCurrentItem({ ...currentItem, unitPrice: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount %
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={currentItem.discountPercent}
+                    onChange={(e) => setCurrentItem({ ...currentItem, discountPercent: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tax %
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={currentItem.taxPercent}
+                    onChange={(e) => setCurrentItem({ ...currentItem, taxPercent: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Item Total:</span>
+                  <span className="font-bold text-lg">{formatCurrency(calculateItemTotal())}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowItemModal(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveItem}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                {editingIndex !== null ? 'Update' : 'Add'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

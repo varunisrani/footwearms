@@ -47,10 +47,10 @@ export function Modal({
   if (!isOpen) return null;
 
   const sizes = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: 'max-w-[95vw] sm:max-w-md',
+    md: 'max-w-[95vw] sm:max-w-lg',
+    lg: 'max-w-[95vw] sm:max-w-2xl',
+    xl: 'max-w-[95vw] sm:max-w-4xl',
   };
 
   return (
@@ -72,7 +72,7 @@ export function Modal({
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-gray-200">
               {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
               {showCloseButton && (
                 <button
@@ -86,7 +86,7 @@ export function Modal({
           )}
 
           {/* Content */}
-          <div className="px-6 py-4">{children}</div>
+          <div className="px-4 py-3 md:px-6 md:py-4">{children}</div>
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@ export function Modal({
 
 export function ModalFooter({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50', className)}>
+    <div className={cn('flex items-center justify-end gap-3 px-4 py-3 md:px-6 md:py-4 border-t border-gray-200 bg-gray-50', className)}>
       {children}
     </div>
   );

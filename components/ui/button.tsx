@@ -6,6 +6,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
   children: ReactNode;
   isLoading?: boolean;
+  fullWidthOnMobile?: boolean;
 }
 
 export function Button({
@@ -15,6 +16,7 @@ export function Button({
   children,
   isLoading,
   disabled,
+  fullWidthOnMobile = false,
   ...props
 }: ButtonProps) {
   const baseStyles =
@@ -36,7 +38,13 @@ export function Button({
 
   return (
     <button
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
+      className={cn(
+        baseStyles,
+        variants[variant],
+        sizes[size],
+        fullWidthOnMobile && 'w-full md:w-auto',
+        className
+      )}
       disabled={disabled || isLoading}
       {...props}
     >

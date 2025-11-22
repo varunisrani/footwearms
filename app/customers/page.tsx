@@ -13,19 +13,19 @@ export default function CustomersPage() {
   }, [loadCustomers]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-3 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center">
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Customers</h1>
             <p className="mt-1 text-sm text-gray-600">
               Manage your customer database
             </p>
           </div>
           <Link
             href="/customers/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center gap-2"
           >
             <span>+</span>
             Add Customer
@@ -34,7 +34,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
         <div className="bg-white p-4 rounded-lg shadow">
           <div className="text-sm text-gray-600">Total Customers</div>
           <div className="text-2xl font-bold text-gray-900">{customers.length}</div>

@@ -166,7 +166,7 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
           <CardTitle>Pricing</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <Input
               label="Base Price (Cost)"
               type="number"
@@ -232,15 +232,16 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
         </CardContent>
       </Card>
 
-      <div className="flex gap-3 justify-end">
+      <div className="flex flex-col md:flex-row gap-3 justify-end">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push('/products')}
+          className="w-full md:w-auto"
         >
           Cancel
         </Button>
-        <Button type="submit">
+        <Button type="submit" className="w-full md:w-auto">
           {isEdit ? 'Update Product' : 'Add Product'}
         </Button>
       </div>
