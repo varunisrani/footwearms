@@ -192,16 +192,6 @@ export default function ProductsPage() {
                             {product.brand}
                           </span>
                         )}
-                        {product.size && (
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            Size: {product.size}
-                          </span>
-                        )}
-                        {product.color && (
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">
-                            {product.color}
-                          </span>
-                        )}
                       </div>
                     </div>
                     <div className="text-right">
