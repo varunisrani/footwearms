@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useInvoices } from '@/lib/hooks/use-invoices';
 import { useSales } from '@/lib/hooks/use-sales';
@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 export const dynamic = 'force-dynamic';
 
-export default function NewInvoicePage() {
+function NewInvoiceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const saleId = searchParams.get('saleId');
@@ -233,5 +233,13 @@ export default function NewInvoicePage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewInvoicePage() {
+  return (
+    <Suspense fallback={<div className="p-6 max-w-4xl mx-auto">Loading...</div>}>
+      <NewInvoiceContent />
+    </Suspense>
   );
 }

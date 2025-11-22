@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSales } from '@/lib/hooks/use-sales';
 import { useCustomers } from '@/lib/hooks/use-customers';
@@ -11,7 +11,7 @@ import type { Sale, SaleItem } from '@/lib/types/database.types';
 
 export const dynamic = 'force-dynamic';
 
-export default function NewSalePage() {
+function NewSaleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customerId = searchParams.get('customerId');
@@ -76,5 +76,13 @@ export default function NewSalePage() {
         onSubmit={handleSubmit}
       />
     </div>
+  );
+}
+
+export default function NewSalePage() {
+  return (
+    <Suspense fallback={<div className="p-6 max-w-6xl mx-auto">Loading...</div>}>
+      <NewSaleContent />
+    </Suspense>
   );
 }
