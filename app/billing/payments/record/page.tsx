@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePayments } from '@/lib/hooks/use-payments';
 import { useInvoices } from '@/lib/hooks/use-invoices';
@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 export const dynamic = 'force-dynamic';
 
-export default function RecordPaymentPage() {
+function RecordPaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const invoiceId = searchParams.get('invoiceId');
@@ -256,5 +256,13 @@ export default function RecordPaymentPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function RecordPaymentPage() {
+  return (
+    <Suspense fallback={<div className="p-6 max-w-4xl mx-auto">Loading...</div>}>
+      <RecordPaymentContent />
+    </Suspense>
   );
 }
