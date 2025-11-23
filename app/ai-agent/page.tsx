@@ -3,6 +3,20 @@
 import { useEffect } from 'react';
 import Script from 'next/script';
 
+// Declare custom element for TypeScript
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'elevenlabs-convai': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          'agent-id': string;
+        },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 export default function AIAgentPage() {
   useEffect(() => {
     // This effect runs after the component mounts
@@ -117,9 +131,12 @@ export default function AIAgentPage() {
                     </div>
 
                     {/* ElevenLabs ConvAI Widget */}
-                    <div className="flex justify-center">
-                      <elevenlabs-convai agent-id="agent_0101karv0x8kfvxa61tcdrq1tkqy"></elevenlabs-convai>
-                    </div>
+                    <div
+                      className="flex justify-center"
+                      dangerouslySetInnerHTML={{
+                        __html: '<elevenlabs-convai agent-id="agent_0101karv0x8kfvxa61tcdrq1tkqy"></elevenlabs-convai>'
+                      }}
+                    />
                   </div>
                 </div>
               </div>
