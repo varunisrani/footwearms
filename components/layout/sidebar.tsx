@@ -16,6 +16,7 @@ import {
   BarChart3,
   Receipt,
   X,
+  Bot,
 } from 'lucide-react';
 
 const navigation = [
@@ -28,6 +29,7 @@ const navigation = [
   { name: 'Sales', href: '/sales', icon: TrendingUp },
   { name: 'Invoices', href: '/billing/invoices', icon: Receipt },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
+  { name: 'AI Agent', href: '/ai-agent', icon: Bot },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
