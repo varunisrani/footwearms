@@ -24,3 +24,54 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.page-transition {
+  animation: pageFade 0.4s ease;
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wave-divider {
+  position: relative;
+  height: 64px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899);
+  overflow: hidden;
+}
+
+.wave-divider::before,
+.wave-divider::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -25%;
+  width: 200%;
+  height: 200%;
+  opacity: 0.35;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.55), transparent 60%);
+  animation: waveDrift 16s linear infinite;
+}
+
+.wave-divider::after {
+  top: -50%;
+  opacity: 0.25;
+  animation-duration: 22s;
+  animation-direction: reverse;
+}
+
+@keyframes waveDrift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
