@@ -1,35 +1,83 @@
 'use client';
 
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
-import { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { usePathname } from 'next/navigation';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { Toaster } from 'react-hot-toast';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { cn } from '@/lib/utils/cn';
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  const updateScrollState = useCallback(() => {
+    const node = scrollContainerRef.current;
+    if (!node) {
+      return;
+    }
+
+    setIsScrolled(node.scrollTop > 20);
+  }, []);
+
+  useEffect(() => {
+    const node = scrollContainerRef.current;
+    if (!node) {
+      return;
+    }
+
+    node.addEventListener('scroll', updateScrollState, { passive: true });
+    updateScrollState();
+
+    return () => {
+      node.removeEventListener('scroll', updateScrollState);
+    };
+  }, [updateScrollState]);
+
+  useEffect(() => {
+    setIsTransitioning(true);
+    const timeout = setTimeout(() => setIsTransitioning(false), 450);
+    return () => clearTimeout(timeout);
+  }, [pathname]);
 
   return (
     <>
-      <div className="flex h-screen overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main Content */}
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Header */}
-          <Header onMenuClick={() => setSidebarOpen(true)} />
+        <div className="relative flex flex-1 flex-col overflow-hidden">
+          <div
+            className={cn(
+              'pointer-events-none fixed left-0 right-0 top-0 z-50 h-0.5 origin-left bg-gradient-to-r from-blue-500 via-indigo-500 to-fuchsia-500 transition duration-500',
+              isTransitioning ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
+            )}
+            aria-hidden="true"
+          />
 
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-3 md:p-6">
-            {children}
+          <Header onMenuClick={() => setSidebarOpen(true)} isScrolled={isScrolled} />
+
+          <main
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto bg-gray-50 px-3 py-4 text-slate-900 scroll-smooth md:px-6 md:py-6"
+          >
+            <div key={pathname} className="page-transition">
+              {children}
+            </div>
+
+            <Footer />
           </main>
         </div>
       </div>
 
-      {/* Toast Notifications */}
       <Toaster
         position="top-right"
         toastOptions={{

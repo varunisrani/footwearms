@@ -79,7 +79,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const Icon = item.icon;
 
             return (
@@ -88,14 +88,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors',
+                  'relative flex items-center gap-3 rounded-lg px-4 pl-8 py-3 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-gray-800 text-white'
+                    ? 'bg-gray-800 text-white shadow-inner shadow-black/10'
                     : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                 )}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className="w-5 h-5 mr-3" />
-                {item.name}
+                <span
+                  className={cn(
+                    'absolute left-2 h-8 w-1 rounded-full bg-gradient-to-b from-blue-400 to-indigo-500 transition',
+                    isActive ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+                <Icon className="h-5 w-5" />
+                <span>{item.name}</span>
               </Link>
             );
           })}
