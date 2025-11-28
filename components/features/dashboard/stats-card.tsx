@@ -22,25 +22,29 @@ export function StatsCard({
   iconBgColor = 'bg-blue-100',
 }: StatsCardProps) {
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-100/30 via-white/0 to-purple-100/40" />
+      <CardContent className="relative z-10 pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900 mt-2">{value}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500">{title}</p>
+            <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
             {trend && (
-              <p
-                className={`text-sm mt-2 ${
-                  trend.isPositive ? 'text-green-600' : 'text-red-600'
+              <span
+                className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                  trend.isPositive
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'bg-rose-50 text-rose-600'
                 }`}
               >
+                <span className="mr-1 text-base">{trend.isPositive ? '↗' : '↘'}</span>
                 {trend.isPositive ? '+' : ''}
                 {trend.value}%
-              </p>
+              </span>
             )}
           </div>
-          <div className={`p-3 rounded-full ${iconBgColor}`}>
-            <Icon className={`w-6 h-6 ${iconColor}`} />
+          <div className={`rounded-2xl p-3 shadow-inner shadow-black/20 ${iconBgColor}`}>
+            <Icon className={`h-7 w-7 ${iconColor}`} />
           </div>
         </div>
       </CardContent>
