@@ -7,8 +7,8 @@ interface TableProps extends HTMLAttributes<HTMLTableElement> {
 
 export function Table({ children, className, ...props }: TableProps) {
   return (
-    <div className="overflow-x-auto">
-      <table className={cn('min-w-full divide-y divide-gray-200', className)} {...props}>
+    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-white/70 bg-white/80 shadow-lg shadow-slate-900/5">
+      <table className={cn('min-w-full divide-y divide-slate-100 text-slate-700', className)} {...props}>
         {children}
       </table>
     </div>
@@ -17,7 +17,13 @@ export function Table({ children, className, ...props }: TableProps) {
 
 export function TableHeader({ children, className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <thead className={cn('bg-gray-50', className)} {...props}>
+    <thead
+      className={cn(
+        'bg-gradient-to-r from-white/70 to-white/40 text-[0.65rem] uppercase tracking-[0.3em] text-slate-500',
+        className
+      )}
+      {...props}
+    >
       {children}
     </thead>
   );
@@ -25,7 +31,7 @@ export function TableHeader({ children, className, ...props }: HTMLAttributes<HT
 
 export function TableBody({ children, className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <tbody className={cn('bg-white divide-y divide-gray-200', className)} {...props}>
+    <tbody className={cn('divide-y divide-slate-100 bg-white/60 backdrop-blur-sm', className)} {...props}>
       {children}
     </tbody>
   );
@@ -33,7 +39,7 @@ export function TableBody({ children, className, ...props }: HTMLAttributes<HTML
 
 export function TableRow({ children, className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={cn('hover:bg-gray-50 transition-colors', className)} {...props}>
+    <tr className={cn('transition-all duration-200 hover:bg-blue-50/60', className)} {...props}>
       {children}
     </tr>
   );
@@ -43,7 +49,7 @@ export function TableHead({ children, className, ...props }: React.ThHTMLAttribu
   return (
     <th
       className={cn(
-        'px-3 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+        'px-3 py-3 text-left text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-slate-500 md:px-6',
         className
       )}
       {...props}
@@ -55,7 +61,13 @@ export function TableHead({ children, className, ...props }: React.ThHTMLAttribu
 
 export function TableCell({ children, className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={cn('px-3 py-2 md:px-6 md:py-4 whitespace-nowrap text-xs md:text-sm text-gray-900', className)} {...props}>
+    <td
+      className={cn(
+        'whitespace-nowrap px-3 py-3 text-xs text-slate-900 md:px-6 md:py-4 md:text-sm',
+        className
+      )}
+      {...props}
+    >
       {children}
     </td>
   );

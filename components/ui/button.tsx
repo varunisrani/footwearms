@@ -20,21 +20,25 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center rounded-2xl font-semibold tracking-tight transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 disabled:opacity-60 disabled:cursor-not-allowed active:translate-y-0 hover:-translate-y-0.5';
 
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    outline: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-  };
+    primary:
+      'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-indigo-600/40 focus-visible:ring-blue-500',
+    secondary:
+      'bg-white/80 text-slate-800 border border-slate-200 shadow-md hover:bg-white focus-visible:ring-slate-500',
+    danger:
+      'bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-lg shadow-rose-500/30 focus-visible:ring-rose-500',
+    outline:
+      'border border-slate-200 text-slate-800 bg-transparent hover:bg-white/70 focus-visible:ring-blue-400',
+    ghost: 'text-slate-600 hover:bg-slate-100/70 focus-visible:ring-slate-400',
+  } as const;
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
-  };
+    sm: 'px-3.5 py-2 text-sm',
+    md: 'px-5 py-2.5 text-base',
+    lg: 'px-7 py-3 text-lg',
+  } as const;
 
   return (
     <button
@@ -46,11 +50,12 @@ export function Button({
         className
       )}
       disabled={disabled || isLoading}
+      aria-busy={isLoading ? 'true' : 'false'}
       {...props}
     >
       {isLoading && (
         <svg
-          className="animate-spin -ml-1 mr-2 h-4 w-4"
+          className="mr-2 h-4 w-4 animate-spin text-current"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
