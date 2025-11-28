@@ -8,7 +8,10 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 export function Card({ children, className, ...props }: CardProps) {
   return (
     <div
-      className={cn('bg-white rounded-lg shadow-md border border-gray-200', className)}
+      className={cn(
+        'relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-lg shadow-slate-900/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/10 focus-within:ring-2 focus-within:ring-blue-500/30',
+        className
+      )}
       {...props}
     >
       {children}
@@ -18,7 +21,13 @@ export function Card({ children, className, ...props }: CardProps) {
 
 export function CardHeader({ children, className, ...props }: CardProps) {
   return (
-    <div className={cn('px-4 py-3 md:px-6 md:py-4 border-b border-gray-200', className)} {...props}>
+    <div
+      className={cn(
+        'px-4 py-3 md:px-6 md:py-4 border-b border-slate-200/60 bg-white/40 backdrop-blur',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -50,7 +59,13 @@ export function CardContent({ children, className, ...props }: CardProps) {
 
 export function CardFooter({ children, className, ...props }: CardProps) {
   return (
-    <div className={cn('px-4 py-3 md:px-6 md:py-4 border-t border-gray-200 bg-gray-50', className)} {...props}>
+    <div
+      className={cn(
+        'px-4 py-3 md:px-6 md:py-4 border-t border-slate-200/60 bg-white/60 backdrop-blur',
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
