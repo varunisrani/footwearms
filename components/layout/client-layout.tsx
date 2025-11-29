@@ -23,7 +23,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
           <Header onMenuClick={() => setSidebarOpen(true)} />
 
           {/* Page Content */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-3 md:p-6">
+          <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 p-3 md:p-6 transition-colors duration-200">
             {children}
           </main>
         </div>
@@ -35,8 +35,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: 'var(--surface, #363636)',
+            color: 'var(--text-primary, #fff)',
+            borderRadius: '12px',
+            border: '1px solid var(--border-light, transparent)',
           },
           success: {
             duration: 3000,
