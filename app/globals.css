@@ -659,3 +659,192 @@ body {
   transform: rotate(90deg) scale(0);
   opacity: 0;
 }
+
+.masonry-grid {
+  column-count: 1;
+  column-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .masonry-grid {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  .masonry-grid {
+    column-count: 3;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+}
+
+.product-card-appear {
+  animation: card-pop 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
+@keyframes card-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.filter-wave {
+  animation: filter-wave 0.45s ease;
+}
+
+@keyframes filter-wave {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    110deg,
+    rgba(241, 245, 249, 0.6) 8%,
+    rgba(226, 232, 240, 0.8) 18%,
+    rgba(241, 245, 249, 0.6) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.wishlist-pulse {
+  animation: wishlist-burst 0.6s ease;
+}
+
+@keyframes wishlist-burst {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.price-flash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+}
+
+.price-burst {
+  position: relative;
+}
+
+.price-burst::after {
+  content: '';
+  position: absolute;
+  inset: -0.4rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 65%);
+  opacity: 0;
+  animation: price-glow 2s ease infinite;
+}
+
+@keyframes price-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+
+.size-pill-active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+}
+
+.quantity-bounce-up {
+  animation: qty-up 0.25s ease;
+}
+
+.quantity-bounce-down {
+  animation: qty-down 0.25s ease;
+}
+
+@keyframes qty-up {
+  0% {
+    transform: translateY(4px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes qty-down {
+  0% {
+    transform: translateY(-4px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.85);
+  color: #0f172a;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+}
+
+@keyframes shine {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  40%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%);
+  }
+}

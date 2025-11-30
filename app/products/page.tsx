@@ -12,14 +12,19 @@ import { ResponsiveTable } from '@/components/ui/responsive-table';
 import { useAppStore } from '@/lib/stores/app-store';
 import { formatCurrency } from '@/lib/utils/format';
 import toast from 'react-hot-toast';
+import { ProductShowcase } from '@/components/features/products/product-grid';
 
 export default function ProductsPage() {
   const { products, manufacturers, loadProducts, loadManufacturers, deleteProduct } = useAppStore();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isShowcaseLoading, setIsShowcaseLoading] = useState(true);
 
   useEffect(() => {
+    setIsShowcaseLoading(true);
     loadProducts();
     loadManufacturers();
+    const timeout = setTimeout(() => setIsShowcaseLoading(false), 600);
+    return () => clearTimeout(timeout);
   }, [loadProducts, loadManufacturers]);
 
   const handleDelete = (id: number, name: string) => {
@@ -87,11 +92,18 @@ export default function ProductsPage() {
         </Card>
       </div>
 
+      {/* Immersive Product Grid */}
+      <ProductShowcase
+        products={products}
+        manufacturers={manufacturers}
+        isLoading={isShowcaseLoading}
+      />
+
       {/* Products Table */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Product List</CardTitle>
+            <CardTitle>Product Management Table</CardTitle>
             <div className="relative w-72">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
