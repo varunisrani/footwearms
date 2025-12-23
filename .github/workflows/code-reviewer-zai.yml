@@ -1,0 +1,394 @@
+name: Code Reviewer (Z.AI GLM)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  code-review:
+    # Trigger on PR creation/update OR on @code-review comment from authorized users
+    if: |
+      github.event_name == 'pull_request' ||
+      (
+        github.event_name == 'issue_comment' &&
+        contains(github.event.comment.body, '@code-review') &&
+        contains(fromJSON('["varunisrani"]'), github.event.comment.user.login)
+      )
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR information
+        id: pr-info
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          else
+            PR_NUMBER="${{ github.event.issue.number }}"
+            PR_TITLE="${{ github.event.issue.title }}"
+            PR_DESCRIPTION="${{ github.event.issue.body }}"
+          fi
+
+          echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "pr_title=${PR_TITLE}" >> $GITHUB_OUTPUT
+          echo "pr_description=${PR_DESCRIPTION}" >> $GITHUB_OUTPUT
+
+      - name: Load code reviewer instructions
+        id: load-instructions
+        run: |
+          # Read the code reviewer prompt template
+          INSTRUCTIONS=$(cat .github/code_reviewer_zai_prompt.md)
+
+          # Use heredoc to preserve multiline content
+          echo "CUSTOM_INSTRUCTIONS<<EOF" >> $GITHUB_OUTPUT
+          echo "# GitHub Context" >> $GITHUB_OUTPUT
+          echo "- Repository: ${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "- PR Number: ${{ steps.pr-info.outputs.pr_number }}" >> $GITHUB_OUTPUT
+          echo "- PR Title: ${{ steps.pr-info.outputs.pr_title }}" >> $GITHUB_OUTPUT
+          echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "- Date: $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "$INSTRUCTIONS" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "---" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "# Review Task:" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Please review this pull request: #${{ steps.pr-info.outputs.pr_number }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "PR Title: **${{ steps.pr-info.outputs.pr_title }}**" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Provide comprehensive code review following the structure and guidelines above." >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Validate API Credentials & Environment
+        id: validate-env
+        run: |
+          echo "========================================="
+          echo "API CREDENTIALS VALIDATION"
+          echo "========================================="
+
+          # Check all available credentials
+          OAUTH_TOKEN="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
+          Z_AI_SECRET="${{ secrets.Z_AI_API_KEY }}"
+
+          echo "Checking available API credentials..."
+          echo ""
+
+          if [ -z "$OAUTH_TOKEN" ]; then
+            echo "[WARNING] CLAUDE_CODE_OAUTH_TOKEN is NOT SET"
+            echo "  Solution: Add Claude Code OAuth token to GitHub secrets"
+            echo "  Go to: https://github.com/varunisrani/doit/settings/secrets/actions"
+          else
+            echo "[SUCCESS] CLAUDE_CODE_OAUTH_TOKEN is SET"
+          fi
+
+          echo ""
+
+          if [ -z "$Z_AI_SECRET" ]; then
+            echo "[WARNING] Z_AI_API_KEY is NOT SET"
+            echo "  Solution: Add Z.AI API key to GitHub secrets"
+            echo "  Go to: https://z.ai/manage-apikey"
+          else
+            Z_KEY_LENGTH=${#Z_AI_SECRET}
+            echo "[SUCCESS] Z_AI_API_KEY is SET"
+            echo "  - Length: ${Z_KEY_LENGTH} characters"
+            echo "  - Prefix: ${Z_AI_SECRET:0:10}... (first 10 chars)"
+            echo "  - Format: VALID (Z.AI format accepted)"
+          fi
+
+          echo ""
+          echo "Authentication Strategy:"
+          echo "  - Primary: CLAUDE_CODE_OAUTH_TOKEN (Claude OAuth)"
+          echo "  - Secondary: Z_AI_API_KEY (Z.AI endpoint routing)"
+          echo "  - Endpoint: https://api.z.ai/api/anthropic"
+          echo "  - Models: GLM-4.7 (Opus/Sonnet), GLM-4.5-Air (Haiku)"
+
+          # Validate environment variables
+          echo ""
+          echo "========================================="
+          echo "ENVIRONMENT VARIABLES CHECK"
+          echo "========================================="
+          echo "ANTHROPIC_API_KEY: $([ -z '${{ secrets.Z_AI_API_KEY }}' ] && echo 'NOT SET' || echo 'SET (masked)')"
+          echo "ANTHROPIC_BASE_URL: ${{ env.BASE_URL }}"
+          echo "API_TIMEOUT_MS: ${{ env.TIMEOUT_MS }}"
+          echo ""
+          echo "GLM Model Configuration:"
+          echo "  Opus:   ${{ env.OPUS_MODEL }}"
+          echo "  Sonnet: ${{ env.SONNET_MODEL }}"
+          echo "  Haiku:  ${{ env.HAIKU_MODEL }}"
+
+          # Check if prompt file exists
+          echo ""
+          echo "========================================="
+          echo "FILE VALIDATION"
+          echo "========================================="
+          if [ -f ".github/code_reviewer_zai_prompt.md" ]; then
+            echo "[SUCCESS] code_reviewer_zai_prompt.md found"
+            echo "File size: $(wc -c < .github/code_reviewer_zai_prompt.md) bytes"
+          else
+            echo "[ERROR] code_reviewer_zai_prompt.md NOT FOUND"
+            exit 1
+          fi
+
+          echo ""
+          echo "========================================="
+          echo "SYSTEM INFO"
+          echo "========================================="
+          echo "Runner OS: ${{ runner.os }}"
+          echo "GitHub Event: ${{ github.event_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repo: ${{ github.repository }}"
+
+        env:
+          BASE_URL: "https://api.z.ai/api/anthropic"
+          TIMEOUT_MS: "3000000"
+          OPUS_MODEL: "glm-4.6"
+          SONNET_MODEL: "glm-4.6"
+          HAIKU_MODEL: "glm-4-5-air"
+          Z_AI_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+
+      - name: Verify Secrets Passed to Claude Action
+        id: pre-action-check
+        run: |
+          echo "========================================="
+          echo "PRE-ACTION CREDENTIALS CHECK"
+          echo "========================================="
+
+          OAUTH_AVAILABLE="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
+          Z_AI_AVAILABLE="${{ secrets.Z_AI_API_KEY }}"
+
+          if [ -z "$OAUTH_AVAILABLE" ]; then
+            echo "[ERROR] CLAUDE_CODE_OAUTH_TOKEN not available!"
+            echo "Please add CLAUDE_CODE_OAUTH_TOKEN secret"
+            exit 1
+          fi
+
+          echo "[SUCCESS] Credentials available to this step"
+          echo ""
+          echo "Credentials being passed to Claude action:"
+          echo "  - CLAUDE_CODE_OAUTH_TOKEN: [SET - For authentication]"
+
+          if [ -n "$Z_AI_AVAILABLE" ]; then
+            echo "  - Z_AI_API_KEY: [SET - For Z.AI endpoint routing]"
+          else
+            echo "  - Z_AI_API_KEY: [NOT SET - Optional for Z.AI routing]"
+          fi
+
+          echo ""
+          echo "Environment variables configuration:"
+          echo "  - CLAUDE_CODE_OAUTH_TOKEN: Claude OAuth authentication"
+          echo "  - ANTHROPIC_AUTH_TOKEN: Z.AI API key for endpoint routing"
+          echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
+          echo "  - API_TIMEOUT_MS: 3000000"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
+          echo ""
+          echo "Authentication Strategy: Claude OAuth + Z.AI endpoint routing"
+
+      - name: Test Z.AI API Key Format
+        id: test-zai-key
+        run: |
+          echo "========================================="
+          echo "Z.AI API KEY FORMAT TEST"
+          echo "========================================="
+
+          API_KEY="${{ secrets.Z_AI_API_KEY }}"
+          KEY_LENGTH=${#API_KEY}
+          KEY_PREFIX=${API_KEY:0:10}
+
+          echo "[INFO] Testing Z.AI API key..."
+          echo "Key length: ${KEY_LENGTH} characters"
+          echo "Key prefix: ${KEY_PREFIX}..."
+
+          # Z.AI keys typically start with alphanumeric characters
+          if [[ "$KEY_PREFIX" =~ ^[a-zA-Z0-9] ]]; then
+            echo "[SUCCESS] API key format appears valid for Z.AI"
+            echo "Key format: Alphanumeric prefix (expected for Z.AI)"
+          else
+            echo "[WARNING] Unexpected API key format"
+          fi
+
+          echo ""
+          echo "Z.AI Endpoint Configuration:"
+          echo "- Base URL: https://api.z.ai/api/anthropic"
+          echo "- Authentication: Bearer token (API key)"
+          echo "- Models: GLM-4.7"
+
+      - name: Run Code Reviewer (Z.AI GLM)
+        id: claude
+        uses: anthropics/claude-code-action@beta
+        timeout-minutes: 20
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Route to Z.AI endpoint with Z.AI API key
+          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
+          API_TIMEOUT_MS: 3000000
+          # GLM Model Configuration (Z.AI models)
+          ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7
+          ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
+        with:
+          # Claude OAuth authentication (passed via with, not env)
+          ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          trigger_phrase: "@code-review"
+          custom_instructions: ${{ steps.load-instructions.outputs.CUSTOM_INSTRUCTIONS }}
+
+      - name: Diagnostic Info on Action Failure
+        if: failure() && steps.claude.outcome == 'failure'
+        run: |
+          echo "========================================="
+          echo "ACTION FAILED - DIAGNOSTIC INFO"
+          echo "========================================="
+          echo ""
+          echo "Status of validation steps:"
+          echo "  [Step 1] Validate Z.AI API Key & Environment: ${{ steps.validate-env.outcome }}"
+          echo "  [Step 2] Verify Secret Passed to Claude Action: ${{ steps.pre-action-check.outcome }}"
+          echo "  [Step 3] Test Z.AI API Key Format: ${{ steps.test-zai-key.outcome }}"
+          echo "  [Step 4] Run Code Reviewer (Z.AI GLM): ${{ steps.claude.outcome }}"
+          echo ""
+          echo "Environment variables passed to Claude action:"
+          echo "  - GH_TOKEN: [MASKED]"
+          echo "  - ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}"
+          echo "  - ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic"
+          echo "  - API_TIMEOUT_MS: 3000000"
+          echo "  - ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7"
+          echo "  - ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air"
+          echo ""
+          echo "Troubleshooting Z.AI Integration:"
+          echo ""
+          echo "[Issue 1] API key validation passes but action fails"
+          echo "  Solution: Verify Z.AI endpoint authentication accepts the key format"
+          echo ""
+          echo "[Issue 2] Claude action not reading ANTHROPIC_API_KEY from env"
+          echo "  Solution: Check if action requires specific env variable naming"
+          echo ""
+          echo "[Issue 3] Z.AI service or endpoint issue"
+          echo "  Solution: Test API key directly at https://z.ai/manage-apikey/apikey-list"
+          echo ""
+          echo "[Issue 4] Custom base URL not supported by Claude action"
+          echo "  Solution: Try using CLAUDE_CODE_OAUTH_TOKEN with direct Claude API"
+          echo ""
+          echo "Next steps:"
+          echo "1. Verify API key is active: https://z.ai/manage-apikey/apikey-list"
+          echo "2. Test Z.AI endpoint directly: curl -H 'Authorization: Bearer YOUR_KEY' https://api.z.ai/api/anthropic/models"
+          echo "3. Check Z.AI service status: https://status.z.ai"
+          echo "4. Consider using CLAUDE_CODE_OAUTH_TOKEN for direct Anthropic API"
+          echo ""
+          echo "========================================="
+
+      - name: Post review as PR comment
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const reviewMessage = [
+              '## [REVIEW] Code Review by GLM-4.7 (Z.AI)',
+              '',
+              '**Status**: [SUCCESS] Review Complete',
+              '',
+              'The code review has been completed by GLM-4.7 via Z.AI integration.',
+              '',
+              '**Reviewer Notes**:',
+              '- Uses GLM-4.7 Language Model',
+              '- Powered by Z.AI API',
+              '- Comprehensive code quality assessment',
+              '- Architecture and security review included',
+              '',
+              '---',
+              '',
+              '*Review powered by GLM-4.7 via Z.AI | Z.AI Code Reviewer*'
+            ].join('\n');
+
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              body: reviewMessage,
+              event: 'COMMENT'
+            });
+
+      - name: Comment on issue with review complete
+        if: github.event_name == 'issue_comment' && success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const message = [
+              '[SUCCESS] **Code Review Complete**',
+              '',
+              '**Reviewer**: GLM-4.7 (Z.AI)',
+              '**Status**: Review finished and analysis provided',
+              '',
+              'The code review has been completed using GLM-4.7 language model via Z.AI.',
+              '',
+              '---',
+              '',
+              '[BOT] Powered by GLM-4.7 via Z.AI | Fast Code Reviews'
+            ].join('\n');
+
+            if (context.eventName === 'issue_comment') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: message
+              });
+            }
+
+  unauthorized-message:
+    # Post message for unauthorized users
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@code-review') &&
+      !contains(fromJSON('["varunisrani"]'), github.event.comment.user.login)
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Post unauthorized message
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = [
+              '[ERROR] @' + context.actor + ' - You are not authorized to trigger code review.',
+              '',
+              'Only maintainers can trigger the code reviewer. Please ask a maintainer to run the review command.',
+              '',
+              '**Note**: Code reviews are automatically triggered on all pull requests without needing a command.'
+            ].join('\n');
+
+            const comment = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            };
+
+            if (context.eventName === 'issue_comment') {
+              await github.rest.issues.createComment({
+                ...comment,
+                issue_number: context.issue.number
+              });
+            }

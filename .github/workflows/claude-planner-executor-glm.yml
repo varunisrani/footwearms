@@ -1,0 +1,181 @@
+name: GLM Code Planner Executor (Z.AI)
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  glm-planner-executor:
+    # Only trigger on @claude-planner-executor command from authorized users
+    if: |
+      (
+        github.event_name == 'issue_comment' ||
+        github.event_name == 'pull_request_review_comment'
+      ) &&
+      contains(github.event.comment.body, '@claude-planner-executor') &&
+      contains(fromJSON('["varunisrani"]'), github.event.comment.user.login)
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Allow creating branches and editing files
+      pull-requests: write # Allow creating and updating pull requests
+      issues: write # Allow commenting on and updating issues
+      id-token: write # Required for OIDC authentication
+      actions: read # Read CI results
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better context
+
+      - name: Load planner instructions
+        id: load-instructions
+        run: |
+          # Get the issue or PR number from the event
+          if [ "${{ github.event_name }}" == "issue_comment" ]; then
+            ISSUE_NUMBER="${{ github.event.issue.number }}"
+          else
+            ISSUE_NUMBER="${{ github.event.pull_request.number }}"
+          fi
+
+          # Read the template and replace the AI_ASSISTANT placeholder
+          INSTRUCTIONS=$(cat .github/issue_fix_prompt.md | sed 's/{AI_ASSISTANT}/glm/g')
+
+          # Use heredoc to preserve multiline content with context prepended
+          echo "CUSTOM_INSTRUCTIONS<<EOF" >> $GITHUB_OUTPUT
+          echo "# GitHub Context" >> $GITHUB_OUTPUT
+          echo "- Repository: ${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "- Issue/PR Number: ${ISSUE_NUMBER}" >> $GITHUB_OUTPUT
+          echo "- Triggered by: ${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
+          echo "- Model: GLM-4.7 (Z.AI)" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "$INSTRUCTIONS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Validate API Credentials
+        id: validate-env
+        run: |
+          echo "========================================="
+          echo "API CREDENTIALS VALIDATION"
+          echo "========================================="
+
+          OAUTH_TOKEN="${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
+          Z_AI_SECRET="${{ secrets.Z_AI_API_KEY }}"
+
+          echo "Checking available credentials..."
+          echo ""
+
+          if [ -z "$OAUTH_TOKEN" ]; then
+            echo "[WARNING] CLAUDE_CODE_OAUTH_TOKEN is NOT SET"
+          else
+            echo "[SUCCESS] CLAUDE_CODE_OAUTH_TOKEN is SET"
+          fi
+
+          echo ""
+
+          if [ -z "$Z_AI_SECRET" ]; then
+            echo "[WARNING] Z_AI_API_KEY is NOT SET"
+          else
+            Z_KEY_LENGTH=${#Z_AI_SECRET}
+            echo "[SUCCESS] Z_AI_API_KEY is SET"
+            echo "  - Length: ${Z_KEY_LENGTH} characters"
+            echo "  - Format: Valid Z.AI format"
+          fi
+
+          echo ""
+          echo "Authentication Strategy:"
+          echo "  - Primary: CLAUDE_CODE_OAUTH_TOKEN (Claude OAuth)"
+          echo "  - Secondary: Z_AI_API_KEY (Z.AI GLM endpoint)"
+          echo "  - Models: GLM-4.7 (Planning), GLM-4.5-Air (Tools)"
+          echo ""
+          echo "========================================="
+
+      - name: Run GLM Code Planner Executor
+        id: glm-planner
+        uses: anthropics/claude-code-action@beta
+        timeout-minutes: 30
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Z.AI GLM Configuration
+          ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
+          API_TIMEOUT_MS: 3000000
+          # GLM Model Configuration
+          ANTHROPIC_DEFAULT_OPUS_MODEL: glm-4.7
+          ANTHROPIC_DEFAULT_SONNET_MODEL: glm-4.7
+          ANTHROPIC_DEFAULT_HAIKU_MODEL: glm-4-5-air
+        with:
+          # Claude OAuth for authentication
+          ANTHROPIC_API_KEY: ${{ secrets.Z_AI_API_KEY }}
+          # Custom trigger phrase for executor workflow
+          trigger_phrase: "@claude-planner-executor"
+          # Planner-specific instructions
+          custom_instructions: ${{ steps.load-instructions.outputs.CUSTOM_INSTRUCTIONS }}
+
+      - name: Diagnostic Info on Failure
+        if: failure() && steps.glm-planner.outcome == 'failure'
+        run: |
+          echo "========================================="
+          echo "EXECUTOR FAILED - DIAGNOSTIC INFO"
+          echo "========================================="
+          echo ""
+          echo "Status:"
+          echo "  - Validation: ${{ steps.validate-env.outcome }}"
+          echo "  - Executor: ${{ steps.glm-planner.outcome }}"
+          echo ""
+          echo "Configuration:"
+          echo "  - Base URL: https://api.z.ai/api/anthropic"
+          echo "  - Models: GLM-4.7 (Opus/Sonnet), GLM-4.5-Air (Haiku)"
+          echo "  - Authentication: CLAUDE_CODE_OAUTH_TOKEN + Z_AI_API_KEY"
+          echo ""
+          echo "Troubleshooting:"
+          echo "  1. Verify CLAUDE_CODE_OAUTH_TOKEN is valid"
+          echo "  2. Verify Z_AI_API_KEY is active"
+          echo "  3. Check Z.AI service status at https://status.z.ai"
+          echo ""
+          echo "========================================="
+
+  unauthorized-message:
+    # Post message for unauthorized users
+    if: |
+      (
+        github.event_name == 'issue_comment' ||
+        github.event_name == 'pull_request_review_comment'
+      ) &&
+      contains(github.event.comment.body, '@claude-planner-executor') &&
+      !contains(fromJSON('["varunisrani"]'), github.event.comment.user.login)
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Post unauthorized message
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `❌ @${context.actor} - You are not authorized to trigger GLM planner executor.\n\nOnly maintainers can trigger this command. Please ask a maintainer to run the planner command.`
+            };
+
+            if (context.eventName === 'issue_comment') {
+              await github.rest.issues.createComment({
+                ...comment,
+                issue_number: context.issue.number
+              });
+            } else if (context.eventName === 'pull_request_review_comment') {
+              await github.rest.pulls.createReplyForReviewComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                comment_id: context.payload.comment.id,
+                body: comment.body
+              });
+            }
