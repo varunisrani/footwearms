@@ -246,30 +246,34 @@ export default function ReportsPage() {
               <CardTitle className="text-base md:text-lg">Stock Valuation Report</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>SKU</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Brand</TableHead>
-                    <TableHead>Current Stock</TableHead>
-                    <TableHead>Base Price</TableHead>
-                    <TableHead>Stock Value</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {products.map(product => (
-                    <TableRow key={product.id}>
-                      <TableCell className="font-mono text-xs">{product.sku}</TableCell>
-                      <TableCell className="font-medium">{product.name}</TableCell>
-                      <TableCell>{product.brand}</TableCell>
-                      <TableCell>{product.currentStock}</TableCell>
-                      <TableCell>{formatCurrency(product.basePrice)}</TableCell>
-                      <TableCell className="font-semibold">{formatCurrency(product.currentStock * product.basePrice)}</TableCell>
+              {products.length === 0 ? (
+                <p className="text-sm text-gray-500">No inventory data yet.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>Product</TableHead>
+                      <TableHead>Brand</TableHead>
+                      <TableHead>Current Stock</TableHead>
+                      <TableHead>Base Price</TableHead>
+                      <TableHead>Stock Value</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {products.map(product => (
+                      <TableRow key={product.id}>
+                        <TableCell className="font-mono text-xs">{product.sku}</TableCell>
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>{product.brand}</TableCell>
+                        <TableCell>{product.currentStock}</TableCell>
+                        <TableCell>{formatCurrency(product.basePrice)}</TableCell>
+                        <TableCell className="font-semibold">{formatCurrency(product.currentStock * product.basePrice)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </>
@@ -330,35 +334,39 @@ export default function ReportsPage() {
               <CardTitle className="text-base md:text-lg">Sales Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sale Number</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Paid</TableHead>
-                    <TableHead>Balance</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sales.map(sale => {
-                    const customer = customers.find(c => c.id === sale.customerId);
-                    return (
-                      <TableRow key={sale.id}>
-                        <TableCell className="font-mono text-xs">{sale.saleNumber}</TableCell>
-                        <TableCell className="font-medium">{customer?.name || 'Unknown'}</TableCell>
-                        <TableCell>{formatDate(sale.saleDate)}</TableCell>
-                        <TableCell>{formatCurrency(sale.totalAmount)}</TableCell>
-                        <TableCell className="text-green-600">{formatCurrency(sale.paidAmount)}</TableCell>
-                        <TableCell className="text-red-600">{formatCurrency(sale.balanceAmount)}</TableCell>
-                        <TableCell>{sale.status}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              {sales.length === 0 ? (
+                <p className="text-sm text-gray-500">No sales recorded yet.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Sale Number</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Paid</TableHead>
+                      <TableHead>Balance</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sales.map(sale => {
+                      const customer = customers.find(c => c.id === sale.customerId);
+                      return (
+                        <TableRow key={sale.id}>
+                          <TableCell className="font-mono text-xs">{sale.saleNumber}</TableCell>
+                          <TableCell className="font-medium">{customer?.name || 'Unknown'}</TableCell>
+                          <TableCell>{formatDate(sale.saleDate)}</TableCell>
+                          <TableCell>{formatCurrency(sale.totalAmount)}</TableCell>
+                          <TableCell className="text-green-600">{formatCurrency(sale.paidAmount)}</TableCell>
+                          <TableCell className="text-red-600">{formatCurrency(sale.balanceAmount)}</TableCell>
+                          <TableCell>{sale.status}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </>
@@ -399,35 +407,39 @@ export default function ReportsPage() {
               <CardTitle className="text-base md:text-lg">Purchase Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>PO Number</TableHead>
-                    <TableHead>Manufacturer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Paid</TableHead>
-                    <TableHead>Balance</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchases.map(purchase => {
-                    const manufacturer = manufacturers.find(m => m.id === purchase.manufacturerId);
-                    return (
-                      <TableRow key={purchase.id}>
-                        <TableCell className="font-mono text-xs">{purchase.purchaseNumber}</TableCell>
-                        <TableCell className="font-medium">{manufacturer?.name || 'Unknown'}</TableCell>
-                        <TableCell>{formatDate(purchase.purchaseDate)}</TableCell>
-                        <TableCell>{formatCurrency(purchase.totalAmount)}</TableCell>
-                        <TableCell className="text-green-600">{formatCurrency(purchase.paidAmount)}</TableCell>
-                        <TableCell className="text-red-600">{formatCurrency(purchase.balanceAmount)}</TableCell>
-                        <TableCell>{purchase.status}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              {purchases.length === 0 ? (
+                <p className="text-sm text-gray-500">No purchases recorded yet.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>PO Number</TableHead>
+                      <TableHead>Manufacturer</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Paid</TableHead>
+                      <TableHead>Balance</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {purchases.map(purchase => {
+                      const manufacturer = manufacturers.find(m => m.id === purchase.manufacturerId);
+                      return (
+                        <TableRow key={purchase.id}>
+                          <TableCell className="font-mono text-xs">{purchase.purchaseNumber}</TableCell>
+                          <TableCell className="font-medium">{manufacturer?.name || 'Unknown'}</TableCell>
+                          <TableCell>{formatDate(purchase.purchaseDate)}</TableCell>
+                          <TableCell>{formatCurrency(purchase.totalAmount)}</TableCell>
+                          <TableCell className="text-green-600">{formatCurrency(purchase.paidAmount)}</TableCell>
+                          <TableCell className="text-red-600">{formatCurrency(purchase.balanceAmount)}</TableCell>
+                          <TableCell>{purchase.status}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </>
