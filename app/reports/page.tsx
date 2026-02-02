@@ -22,6 +22,8 @@ const saleItemService = new StorageService<SaleItem>('saleItems');
 export default function ReportsPage() {
   const { products, manufacturers, customers, purchases, sales, loadProducts, loadManufacturers, loadCustomers, loadPurchases, loadSales } = useAppStore();
   const [activeReport, setActiveReport] = useState<'inventory' | 'sales' | 'purchases'>('inventory');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     loadProducts();
@@ -31,21 +33,37 @@ export default function ReportsPage() {
     loadSales();
   }, [loadProducts, loadManufacturers, loadCustomers, loadPurchases, loadSales]);
 
+  const withinRange = (dateStr?: string) => {
+    if (!startDate && !endDate) return true;
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    if (startDate && date < new Date(startDate)) return false;
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      if (date > end) return false;
+    }
+    return true;
+  };
+
+  const filteredSales = sales.filter((s) => withinRange(s.saleDate));
+  const filteredPurchases = purchases.filter((p) => withinRange(p.purchaseDate));
+
   // Inventory Report Data
   const totalStockValue = products.reduce((sum, p) => sum + (p.currentStock * p.basePrice), 0);
   const totalStockQty = products.reduce((sum, p) => sum + p.currentStock, 0);
   const lowStockCount = products.filter(p => p.currentStock <= p.minStockLevel).length;
 
   // Sales Report Data
-  const totalSalesAmount = sales.reduce((sum, s) => sum + s.totalAmount, 0);
-  const totalSalesCount = sales.length;
-  const totalPaidAmount = sales.reduce((sum, s) => sum + s.paidAmount, 0);
-  const totalOutstanding = sales.reduce((sum, s) => sum + s.balanceAmount, 0);
+  const totalSalesAmount = filteredSales.reduce((sum, s) => sum + s.totalAmount, 0);
+  const totalSalesCount = filteredSales.length;
+  const totalPaidAmount = filteredSales.reduce((sum, s) => sum + s.paidAmount, 0);
+  const totalOutstanding = filteredSales.reduce((sum, s) => sum + s.balanceAmount, 0);
 
   // Purchase Report Data
-  const totalPurchases = purchases.reduce((sum, p) => sum + p.totalAmount, 0);
-  const totalPurchasesPaid = purchases.reduce((sum, p) => sum + p.paidAmount, 0);
-  const totalPurchasesOutstanding = purchases.reduce((sum, p) => sum + p.balanceAmount, 0);
+  const totalPurchases = filteredPurchases.reduce((sum, p) => sum + p.totalAmount, 0);
+  const totalPurchasesPaid = filteredPurchases.reduce((sum, p) => sum + p.paidAmount, 0);
+  const totalPurchasesOutstanding = filteredPurchases.reduce((sum, p) => sum + p.balanceAmount, 0);
 
   // Export to CSV function
   const exportToCSV = () => {
@@ -61,14 +79,14 @@ export default function ReportsPage() {
       filename = 'inventory-report.csv';
     } else if (activeReport === 'sales') {
       csvContent = 'Sale Number,Customer,Date,Total,Paid,Balance,Status\n';
-      sales.forEach(s => {
+      filteredSales.forEach(s => {
         const customer = customers.find(c => c.id === s.customerId);
         csvContent += `${s.saleNumber},${customer?.name || 'Unknown'},${formatDate(s.saleDate)},${s.totalAmount},${s.paidAmount},${s.balanceAmount},${s.status}\n`;
       });
       filename = 'sales-report.csv';
     } else {
       csvContent = 'PO Number,Manufacturer,Date,Total,Paid,Balance,Status\n';
-      purchases.forEach(p => {
+      filteredPurchases.forEach(p => {
         const manufacturer = manufacturers.find(m => m.id === p.manufacturerId);
         csvContent += `${p.purchaseNumber},${manufacturer?.name || 'Unknown'},${formatDate(p.purchaseDate)},${p.totalAmount},${p.paidAmount},${p.balanceAmount},${p.status}\n`;
       });
@@ -112,7 +130,7 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY: 24,
         head: [['Sale #', 'Customer', 'Date', 'Total', 'Paid', 'Balance', 'Status']],
-        body: sales.map((s) => {
+        body: filteredSales.map((s) => {
           const customer = customers.find((c) => c.id === s.customerId);
           return [
             s.saleNumber,
@@ -129,7 +147,7 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY: 24,
         head: [['PO #', 'Manufacturer', 'Date', 'Total', 'Paid', 'Balance', 'Status']],
-        body: purchases.map((p) => {
+        body: filteredPurchases.map((p) => {
           const manufacturer = manufacturers.find((m) => m.id === p.manufacturerId);
           return [
             p.purchaseNumber,
@@ -203,6 +221,40 @@ export default function ReportsPage() {
           Purchase Report
         </button>
       </div>
+
+      {(activeReport === 'sales' || activeReport === 'purchases') && (
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="mt-1 w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">End Date</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="mt-1 w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setStartDate('');
+              setEndDate('');
+            }}
+            className="w-full sm:w-auto"
+          >
+            Clear Filter
+          </Button>
+        </div>
+      )}
 
       {/* Inventory Report */}
       {activeReport === 'inventory' && (
@@ -313,19 +365,19 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardContent className="pt-6">
-                <SalesTrendChart sales={sales} />
+                <SalesTrendChart sales={filteredSales} />
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6">
-                <RevenuePieChart sales={sales} customers={customers} />
+                <RevenuePieChart sales={filteredSales} customers={customers} />
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardContent className="pt-6">
-              <TopCustomersChart sales={sales} customers={customers} />
+              <TopCustomersChart sales={filteredSales} customers={customers} />
             </CardContent>
           </Card>
 
@@ -334,7 +386,7 @@ export default function ReportsPage() {
               <CardTitle className="text-base md:text-lg">Sales Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              {sales.length === 0 ? (
+              {filteredSales.length === 0 ? (
                 <p className="text-sm text-gray-500">No sales recorded yet.</p>
               ) : (
                 <Table>
@@ -350,7 +402,7 @@ export default function ReportsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sales.map(sale => {
+                    {filteredSales.map(sale => {
                       const customer = customers.find(c => c.id === sale.customerId);
                       return (
                         <TableRow key={sale.id}>
@@ -407,7 +459,7 @@ export default function ReportsPage() {
               <CardTitle className="text-base md:text-lg">Purchase Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              {purchases.length === 0 ? (
+              {filteredPurchases.length === 0 ? (
                 <p className="text-sm text-gray-500">No purchases recorded yet.</p>
               ) : (
                 <Table>
@@ -423,7 +475,7 @@ export default function ReportsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {purchases.map(purchase => {
+                    {filteredPurchases.map(purchase => {
                       const manufacturer = manufacturers.find(m => m.id === purchase.manufacturerId);
                       return (
                         <TableRow key={purchase.id}>
