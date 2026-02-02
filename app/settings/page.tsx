@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/utils/format';
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(settingsService.get());
   const [storageInfo, setStorageInfo] = useState({ used: 0, total: 0, percentage: 0 });
+  const [backupFileName, setBackupFileName] = useState('');
 
   useEffect(() => {
     setSettings(settingsService.get());
@@ -39,6 +40,8 @@ export default function SettingsPage() {
   const handleRestore = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setBackupFileName(file.name);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -310,6 +313,9 @@ export default function SettingsPage() {
                   file:bg-blue-50 file:text-blue-700
                   hover:file:bg-blue-100"
               />
+              {backupFileName && (
+                <p className="mt-2 text-xs text-gray-500">Selected: {backupFileName}</p>
+              )}
             </div>
 
             <div className="border-t pt-4">
