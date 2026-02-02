@@ -13,6 +13,7 @@ import { useAppStore } from '@/lib/stores/app-store';
 import { Purchase, PurchaseItem } from '@/lib/types/database.types';
 import { generateDocumentNumber } from '@/lib/services/storage.service';
 import { StorageService } from '@/lib/services/storage.service';
+import { purchaseFormSchema } from '@/lib/validation/purchase.schema';
 import { formatCurrency } from '@/lib/utils/format';
 import toast from 'react-hot-toast';
 
@@ -129,8 +130,13 @@ export function PurchaseForm({ purchase, isEdit = false }: PurchaseFormProps) {
   };
 
   const onSubmit = (data: PurchaseFormData) => {
-    if (lineItems.length === 0) {
-      toast.error('Please add at least one line item');
+    const validation = purchaseFormSchema.safeParse({
+      header: data,
+      items: lineItems,
+    });
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0]?.message || 'Please check the form fields');
       return;
     }
 
