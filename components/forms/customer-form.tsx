@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { Customer } from '@/lib/types/database.types';
+import { customerSchema, type CustomerSchema } from '@/lib/validation/customer.schema';
 
 interface CustomerFormProps {
   customer?: Customer;
@@ -12,26 +14,51 @@ interface CustomerFormProps {
 
 export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps) {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: customer?.name || '',
-    businessName: customer?.businessName || '',
-    contactPerson: customer?.contactPerson || '',
-    email: customer?.email || '',
-    phone: customer?.phone || '',
-    billingAddress: customer?.billingAddress || '',
-    shippingAddress: customer?.shippingAddress || '',
-    gstin: customer?.gstin || '',
-    creditLimit: customer?.creditLimit || 0,
-    outstandingBalance: customer?.outstandingBalance || 0,
-    customerType: customer?.customerType || 'retailer' as const,
-    isActive: customer?.isActive ?? true,
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<CustomerSchema>({
+    resolver: zodResolver(customerSchema),
+    defaultValues: customer
+      ? {
+          name: customer.name,
+          businessName: customer.businessName,
+          contactPerson: customer.contactPerson,
+          email: customer.email,
+          phone: customer.phone,
+          billingAddress: customer.billingAddress,
+          shippingAddress: customer.shippingAddress,
+          gstin: customer.gstin || '',
+          creditLimit: customer.creditLimit,
+          outstandingBalance: customer.outstandingBalance,
+          customerType: customer.customerType,
+          isActive: customer.isActive,
+        }
+      : {
+          name: '',
+          businessName: '',
+          contactPerson: '',
+          email: '',
+          phone: '',
+          billingAddress: '',
+          shippingAddress: '',
+          gstin: '',
+          creditLimit: 0,
+          outstandingBalance: 0,
+          customerType: 'retailer',
+          isActive: true,
+        },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const formValues = watch();
+
+  const handleSubmitForm = (data: CustomerSchema) => {
     const now = new Date().toISOString();
     onSubmit({
-      ...formData,
+      ...data,
       createdAt: customer?.createdAt || now,
       updatedAt: now,
     });
@@ -46,14 +73,11 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
   };
 
   const copyBillingToShipping = () => {
-    setFormData((prev) => ({
-      ...prev,
-      shippingAddress: prev.billingAddress,
-    }));
+    setValue('shippingAddress', formValues.billingAddress);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(handleSubmitForm)} className="space-y-6">
       {/* Basic Information */}
       <div className="bg-white p-4 md:p-6 rounded-lg shadow">
         <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
@@ -65,10 +89,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <input
               type="text"
               required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              {...register('name')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.name && (
+              <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>
+            )}
           </div>
 
           <div>
@@ -78,10 +104,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <input
               type="text"
               required
-              value={formData.businessName}
-              onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+              {...register('businessName')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.businessName && (
+              <p className="text-xs text-red-600 mt-1">{errors.businessName.message}</p>
+            )}
           </div>
 
           <div>
@@ -91,10 +119,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <input
               type="text"
               required
-              value={formData.contactPerson}
-              onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+              {...register('contactPerson')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.contactPerson && (
+              <p className="text-xs text-red-600 mt-1">{errors.contactPerson.message}</p>
+            )}
           </div>
 
           <div>
@@ -103,8 +133,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             </label>
             <select
               required
-              value={formData.customerType}
-              onChange={(e) => setFormData({ ...formData, customerType: e.target.value as Customer['customerType'] })}
+              {...register('customerType')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="retailer">Retailer</option>
@@ -126,10 +155,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <input
               type="email"
               required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              {...register('email')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.email && (
+              <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           <div>
@@ -139,10 +170,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <input
               type="tel"
               required
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              {...register('phone')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.phone && (
+              <p className="text-xs text-red-600 mt-1">{errors.phone.message}</p>
+            )}
           </div>
 
           <div>
@@ -151,8 +184,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             </label>
             <input
               type="text"
-              value={formData.gstin}
-              onChange={(e) => setFormData({ ...formData, gstin: e.target.value })}
+              {...register('gstin')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Optional"
             />
@@ -171,10 +203,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <textarea
               required
               rows={3}
-              value={formData.billingAddress}
-              onChange={(e) => setFormData({ ...formData, billingAddress: e.target.value })}
+              {...register('billingAddress')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.billingAddress && (
+              <p className="text-xs text-red-600 mt-1">{errors.billingAddress.message}</p>
+            )}
           </div>
 
           <div>
@@ -193,10 +227,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
             <textarea
               required
               rows={3}
-              value={formData.shippingAddress}
-              onChange={(e) => setFormData({ ...formData, shippingAddress: e.target.value })}
+              {...register('shippingAddress')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.shippingAddress && (
+              <p className="text-xs text-red-600 mt-1">{errors.shippingAddress.message}</p>
+            )}
           </div>
         </div>
       </div>
@@ -213,10 +249,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
               type="number"
               min="0"
               step="0.01"
-              value={formData.creditLimit}
-              onChange={(e) => setFormData({ ...formData, creditLimit: parseFloat(e.target.value) || 0 })}
+              {...register('creditLimit', { valueAsNumber: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.creditLimit && (
+              <p className="text-xs text-red-600 mt-1">{errors.creditLimit.message}</p>
+            )}
           </div>
 
           {customer && (
@@ -228,10 +266,12 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
                 type="number"
                 min="0"
                 step="0.01"
-                value={formData.outstandingBalance}
-                onChange={(e) => setFormData({ ...formData, outstandingBalance: parseFloat(e.target.value) || 0 })}
+                {...register('outstandingBalance', { valueAsNumber: true })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.outstandingBalance && (
+                <p className="text-xs text-red-600 mt-1">{errors.outstandingBalance.message}</p>
+              )}
             </div>
           )}
         </div>
@@ -243,8 +283,7 @@ export function CustomerForm({ customer, onSubmit, onCancel }: CustomerFormProps
           <input
             type="checkbox"
             id="isActive"
-            checked={formData.isActive}
-            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+            {...register('isActive')}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
