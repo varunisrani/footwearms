@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download, TrendingUp, Package, DollarSign, Users } from 'lucide-react';
+import { Download, FileText, TrendingUp, Package, DollarSign, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
@@ -13,6 +13,8 @@ import { SalesTrendChart } from '@/components/charts/sales-trend-chart';
 import { RevenuePieChart } from '@/components/charts/revenue-pie-chart';
 import { InventoryBarChart } from '@/components/charts/inventory-bar-chart';
 import { TopCustomersChart } from '@/components/charts/top-customers-chart';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const purchaseItemService = new StorageService<PurchaseItem>('purchaseItems');
 const saleItemService = new StorageService<SaleItem>('saleItems');
@@ -85,6 +87,66 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    const title = activeReport === 'inventory' ? 'Inventory Report' : activeReport === 'sales' ? 'Sales Report' : 'Purchase Report';
+    doc.text(title, 14, 18);
+
+    if (activeReport === 'inventory') {
+      autoTable(doc, {
+        startY: 24,
+        head: [['SKU', 'Product', 'Brand', 'Category', 'Stock', 'Min', 'Base Price', 'Stock Value']],
+        body: products.map((p) => [
+          p.sku,
+          p.name,
+          p.brand,
+          p.category,
+          p.currentStock,
+          p.minStockLevel,
+          formatCurrency(p.basePrice),
+          formatCurrency(p.currentStock * p.basePrice),
+        ]),
+      });
+    } else if (activeReport === 'sales') {
+      autoTable(doc, {
+        startY: 24,
+        head: [['Sale #', 'Customer', 'Date', 'Total', 'Paid', 'Balance', 'Status']],
+        body: sales.map((s) => {
+          const customer = customers.find((c) => c.id === s.customerId);
+          return [
+            s.saleNumber,
+            customer?.name || 'Unknown',
+            formatDate(s.saleDate),
+            formatCurrency(s.totalAmount),
+            formatCurrency(s.paidAmount),
+            formatCurrency(s.balanceAmount),
+            s.status,
+          ];
+        }),
+      });
+    } else {
+      autoTable(doc, {
+        startY: 24,
+        head: [['PO #', 'Manufacturer', 'Date', 'Total', 'Paid', 'Balance', 'Status']],
+        body: purchases.map((p) => {
+          const manufacturer = manufacturers.find((m) => m.id === p.manufacturerId);
+          return [
+            p.purchaseNumber,
+            manufacturer?.name || 'Unknown',
+            formatDate(p.purchaseDate),
+            formatCurrency(p.totalAmount),
+            formatCurrency(p.paidAmount),
+            formatCurrency(p.balanceAmount),
+            p.status,
+          ];
+        }),
+      });
+    }
+
+    doc.save(`${title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       {/* Page Header */}
@@ -93,10 +155,16 @@ export default function ReportsPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Reports & Analytics</h1>
           <p className="text-sm md:text-base text-gray-600 mt-1">View comprehensive business reports and export data</p>
         </div>
-        <Button onClick={exportToCSV} className="w-full sm:w-auto">
-          <Download className="w-4 h-4 mr-2" />
-          Export to CSV
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button onClick={exportToCSV} className="w-full sm:w-auto">
+            <Download className="w-4 h-4 mr-2" />
+            Export to CSV
+          </Button>
+          <Button variant="outline" onClick={exportToPDF} className="w-full sm:w-auto">
+            <FileText className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+        </div>
       </div>
 
       {/* Report Tabs */}
