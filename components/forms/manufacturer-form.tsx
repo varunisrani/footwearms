@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAppStore } from '@/lib/stores/app-store';
 import { Manufacturer } from '@/lib/types/database.types';
+import { manufacturerSchema, type ManufacturerSchema } from '@/lib/validation/manufacturer.schema';
 import toast from 'react-hot-toast';
 
 interface ManufacturerFormProps {
@@ -14,18 +16,7 @@ interface ManufacturerFormProps {
   isEdit?: boolean;
 }
 
-interface ManufacturerFormData {
-  name: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  address: string;
-  gstin: string;
-  creditLimit: string;
-  paymentTerms: string;
-  notes: string;
-  isActive: boolean;
-}
+type ManufacturerFormData = ManufacturerSchema;
 
 export function ManufacturerForm({ manufacturer, isEdit = false }: ManufacturerFormProps) {
   const router = useRouter();
@@ -36,6 +27,7 @@ export function ManufacturerForm({ manufacturer, isEdit = false }: ManufacturerF
     handleSubmit,
     formState: { errors },
   } = useForm<ManufacturerFormData>({
+    resolver: zodResolver(manufacturerSchema),
     defaultValues: manufacturer
       ? {
           name: manufacturer.name,
@@ -50,9 +42,16 @@ export function ManufacturerForm({ manufacturer, isEdit = false }: ManufacturerF
           isActive: manufacturer.isActive,
         }
       : {
-          isActive: true,
-          paymentTerms: '30 days',
+          name: '',
+          contactPerson: '',
+          email: '',
+          phone: '',
+          address: '',
+          gstin: '',
           creditLimit: '0',
+          paymentTerms: '30 days',
+          notes: '',
+          isActive: true,
         },
   });
 

@@ -10,6 +10,7 @@ import type {
   Product,
 } from '@/lib/types/database.types';
 import { generateDocumentNumber } from '@/lib/services/storage.service';
+import { salesReturnSchema, salesReturnLineSchema } from '@/lib/validation/sales-return.schema';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface SalesReturnFormProps {
@@ -106,14 +107,21 @@ export function SalesReturnForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const headerValidation = salesReturnSchema.safeParse(formData);
+    if (!headerValidation.success) {
+      alert(headerValidation.error.errors[0]?.message || 'Please check the form fields');
+      return;
+    }
+
     const selectedItems = lineItems.filter((item) => item.selected);
     if (selectedItems.length === 0) {
       alert('Please select at least one item to return');
       return;
     }
 
-    if (!formData.reason.trim()) {
-      alert('Please provide a reason for the return');
+    const invalidLine = selectedItems.find((item) => !salesReturnLineSchema.safeParse(item).success);
+    if (invalidLine) {
+      alert('Please check return items');
       return;
     }
 

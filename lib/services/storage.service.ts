@@ -1,5 +1,6 @@
 // localStorage-based storage service
 import type { Database, AppSettings } from '../types/database.types';
+import { seedDatabase } from './seed-data';
 
 const STORAGE_KEY = 'footwear_db';
 const SETTINGS_KEY = 'footwear_settings';
@@ -60,10 +61,17 @@ export function initializeDatabase(): Database {
     }
     const existingData = localStorage.getItem(STORAGE_KEY);
     if (!existingData) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultDatabase));
-      return defaultDatabase;
+      const seeded = seedDatabase(defaultDatabase);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      return seeded;
     }
-    return JSON.parse(existingData);
+    const parsed = JSON.parse(existingData) as Database;
+    if (parsed.products.length === 0 && parsed.customers.length === 0) {
+      const seeded = seedDatabase(parsed);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      return seeded;
+    }
+    return parsed;
   } catch (error) {
     console.error('Error initializing database:', error);
     return defaultDatabase;

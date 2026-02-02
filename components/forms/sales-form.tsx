@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Sale, SaleItem, Customer, Product } from '@/lib/types/database.types';
 import { generateDocumentNumber } from '@/lib/services/storage.service';
+import { saleFormSchema } from '@/lib/validation/sales.schema';
 import { formatCurrency } from '@/lib/utils/format';
 
 interface SalesFormProps {
@@ -180,18 +181,13 @@ export function SalesForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.customerId === 0) {
-      alert('Please select a customer');
-      return;
-    }
+    const validation = saleFormSchema.safeParse({
+      header: formData,
+      items: lineItems,
+    });
 
-    if (lineItems.length === 0) {
-      alert('Please add at least one item');
-      return;
-    }
-
-    if (lineItems.some((item) => item.productId === 0)) {
-      alert('Please select a product for all line items');
+    if (!validation.success) {
+      alert(validation.error.errors[0]?.message || 'Please check the form fields');
       return;
     }
 

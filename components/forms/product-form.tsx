@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAppStore } from '@/lib/stores/app-store';
 import { Product } from '@/lib/types/database.types';
 import { generateSKU } from '@/lib/utils/format';
+import { productSchema, type ProductSchema } from '@/lib/validation/product.schema';
 import toast from 'react-hot-toast';
 
 interface ProductFormProps {
@@ -17,20 +19,7 @@ interface ProductFormProps {
   isEdit?: boolean;
 }
 
-interface ProductFormData {
-  sku: string;
-  name: string;
-  brand: string;
-  category: string;
-  description: string;
-  manufacturerId: string;
-  basePrice: string;
-  sellingPrice: string;
-  mrp: string;
-  currentStock: string;
-  minStockLevel: string;
-  isActive: boolean;
-}
+type ProductFormData = ProductSchema;
 
 export function ProductForm({ product, isEdit = false }: ProductFormProps) {
   const router = useRouter();
@@ -42,6 +31,7 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
     formState: { errors },
     setValue,
   } = useForm<ProductFormData>({
+    resolver: zodResolver(productSchema),
     defaultValues: product
       ? {
           sku: product.sku,
@@ -59,6 +49,16 @@ export function ProductForm({ product, isEdit = false }: ProductFormProps) {
         }
       : {
           sku: generateSKU('PRD'),
+          name: '',
+          brand: '',
+          category: '',
+          description: '',
+          manufacturerId: '',
+          basePrice: '',
+          sellingPrice: '',
+          mrp: '',
+          currentStock: '',
+          minStockLevel: '',
           isActive: true,
         },
   });
