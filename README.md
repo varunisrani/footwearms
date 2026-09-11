@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FootwearMS
 
-## Getting Started
+FootwearMS is a browser-based footwear inventory, purchasing, sales, customer, and billing management prototype.
 
-First, run the development server:
+## Core features
+
+- Dashboard totals for products, stock, sales, revenue, partners, and low-stock alerts.
+- Product, manufacturer, customer, purchase, and sale management screens.
+- Inventory adjustments, receiving workflows, sales returns, invoices, and payment recording.
+- Reports and charts for sales, revenue, inventory, and customers.
+- PDF document generation and JSON backup/restore utilities.
+- Responsive navigation and light/dark theme support.
+- Browser-local persistence; records are stored in the user's browser rather than a remote database.
+
+## Technology stack
+
+- Next.js 16 App Router, React 19, and TypeScript
+- Tailwind CSS 4
+- Zustand for application state
+- Browser `localStorage` persistence
+- Chart.js and jsPDF
+- React Hook Form, Zod, and date-fns
+
+## Prerequisites
+
+- Node.js compatible with the locked dependencies
+- npm
+
+## Local setup
 
 ```bash
+git clone https://github.com/varunisrani/footwearms.git
+cd footwearms
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production build and start commands:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Lint the project with `npm run lint`.
 
-## Learn More
+## Configuration
 
-To learn more about Next.js, take a look at the following resources:
+No environment variables are referenced by the current application. Data is initialized and retained in browser storage.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/` — App Router pages for the dashboard and management workflows
+- `components/` — forms, tables, charts, layout, and reusable UI components
+- `lib/services/` — local storage and document-generation services
+- `lib/stores/` — Zustand application store
+- `lib/types/` — domain and storage types
+- `public/` — static assets
+- `footwearms/` — an additional tracked copy of an earlier application tree
 
-## Deploy on Vercel
+## Status and limitations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This repository is a client-side prototype. It has no authentication, shared backend, or server-side persistence, so browser data is not synchronized between devices or users. The AI Agent route embeds an externally hosted ElevenLabs widget and requires network access. Review the duplicated `footwearms/` subtree before making changes so the intended application tree remains clear.
